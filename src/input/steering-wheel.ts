@@ -15,6 +15,10 @@ const WHEEL_SVG = `
 
 const SNAP_TO_CENTRE_DEG = 5;
 const MIN_GRAB_RADIUS = 18;
+const SCROLL_DEG_PER_PIXEL = 0.25;
+const LINE_HEIGHT_PX = 16;
+const SCROLL_HOLD_MS = 400;
+const CENTRING_DEG_PER_METRE = { forward: 70, reverse: 12 };
 
 export class SteeringWheel {
   readonly element: HTMLElement;
@@ -22,6 +26,7 @@ export class SteeringWheel {
   private rotation = 0;
   private pointerId: number | null = null;
   private lastAngle = 0;
+  private lastScroll = -Infinity;
 
   constructor() {
     this.graphic = svg(WHEEL_SVG);
@@ -31,6 +36,7 @@ export class SteeringWheel {
     this.element.addEventListener('pointerup', (e) => this.release(e));
     this.element.addEventListener('pointercancel', (e) => this.release(e));
     this.element.addEventListener('lostpointercapture', (e) => this.release(e));
+    this.element.addEventListener('wheel', (e) => this.scroll(e), { passive: false });
   }
 
   /** Steering wheel rotation in degrees; positive turns right. */
@@ -38,8 +44,19 @@ export class SteeringWheel {
     return this.rotation;
   }
 
+  get held(): boolean {
+    return this.pointerId !== null || performance.now() - this.lastScroll < SCROLL_HOLD_MS;
+  }
+
   turnTo(degrees: number): void {
     this.setRotation(degrees);
+  }
+
+  selfCentre(metresTravelled: number): void {
+    if (this.held || metresTravelled === 0 || this.rotation === 0) return;
+    const rate = metresTravelled > 0 ? CENTRING_DEG_PER_METRE.forward : CENTRING_DEG_PER_METRE.reverse;
+    const step = Math.min(Math.abs(this.rotation), rate * Math.abs(metresTravelled));
+    this.setRotation(this.rotation - Math.sign(this.rotation) * step);
   }
 
   private pointerAngle(event: PointerEvent): { angle: number; radius: number } {
@@ -50,7 +67,7 @@ export class SteeringWheel {
   }
 
   private grab(event: PointerEvent): void {
-    if (this.pointerId !== null) return;
+    if (this.pointerId !== null || event.button !== 0) return;
     event.preventDefault();
     this.pointerId = event.pointerId;
     this.lastAngle = this.pointerAngle(event).angle;
@@ -74,6 +91,14 @@ export class SteeringWheel {
     this.pointerId = null;
     this.element.classList.remove('held');
     if (Math.abs(this.rotation) < SNAP_TO_CENTRE_DEG) this.setRotation(0);
+  }
+
+  private scroll(event: WheelEvent): void {
+    event.preventDefault();
+    this.lastScroll = performance.now();
+    const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+    const pixels = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? delta * LINE_HEIGHT_PX : delta;
+    this.setRotation(this.rotation + pixels * SCROLL_DEG_PER_PIXEL);
   }
 
   private setRotation(degrees: number): void {

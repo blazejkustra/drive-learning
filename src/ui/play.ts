@@ -1,5 +1,6 @@
 import { DEG } from '../geometry.ts';
 import { GameSession, type Result } from '../game.ts';
+import { KeyboardControls, type PedalName } from '../input/keyboard.ts';
 import { GearSelector, Pedal } from '../input/pedals.ts';
 import { SteeringWheel } from '../input/steering-wheel.ts';
 import type { Level, Obstacle } from '../level-types.ts';
@@ -71,6 +72,7 @@ export class PlayScreen {
   private readonly gas = new Pedal('Gas', 'gas');
   private readonly brake = new Pedal('Brake', 'brake');
   private readonly gears: GearSelector;
+  private readonly keyboard: KeyboardControls;
 
   private readonly tipText: HTMLElement;
   private readonly hint: HTMLElement;
@@ -110,6 +112,10 @@ export class PlayScreen {
     this.ctx = this.canvas.getContext('2d')!;
     this.gears = new GearSelector((gear) => this.selectGear(gear));
     this.gears.show(this.session.gear);
+    this.keyboard = new KeyboardControls({
+      pedal: (pedal, down) => this.pressPedalKey(pedal, down),
+      gear: (gear) => this.selectGear(gear),
+    });
 
     this.tipText = h('span', { class: 'tip-text' }, [level.tips[0]]);
     const nextTip = h('button', { class: 'tip-next', type: 'button', 'aria-label': 'Next tip' }, [icons.next()]);
@@ -173,6 +179,7 @@ export class PlayScreen {
         h('div', {}, [h('dt', {}, ['km/h']), h('dd', {}, [this.stats.speed])]),
       ]),
       h('div', { class: 'controls' }, [this.gears.element, this.brake.element, this.gas.element]),
+      h('p', { class: 'key-hint' }, ['W gas · S brake · R/D/P gear']),
     ]);
 
     this.overlay = h('div', { class: 'overlay hidden' });
@@ -208,6 +215,7 @@ export class PlayScreen {
   destroy(): void {
     cancelAnimationFrame(this.frameHandle);
     this.resizeObserver.disconnect();
+    this.keyboard.destroy();
     window.clearTimeout(this.toastTimer);
   }
 
@@ -215,6 +223,7 @@ export class PlayScreen {
     const elapsed = Math.min(0.05, (now - this.lastFrame) / 1000);
     this.lastFrame = now;
     const dt = this.slowMotion ? elapsed * 0.4 : elapsed;
+    if (!this.paused) this.wheel.selfCentre(this.session.speed * dt);
     this.session.steer = steerFromWheel(this.wheel.angle);
     this.session.pedals = { gas: this.gas.pressed, brake: this.brake.pressed };
     if (!this.paused) this.session.update(dt);
@@ -294,6 +303,11 @@ export class PlayScreen {
       this.gears.show(gear);
       if (gear === 'P') this.gas.release();
     }
+  }
+
+  private pressPedalKey(pedal: PedalName, down: boolean): void {
+    if (down && (this.paused || (pedal === 'gas' && this.session.gear === 'P'))) return;
+    this[pedal].holdKey(down);
   }
 
   private cycleTip(): void {

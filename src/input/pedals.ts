@@ -4,6 +4,7 @@ import { h, onPress } from '../ui/dom.ts';
 export class Pedal {
   readonly element: HTMLButtonElement;
   private readonly pointers = new Set<number>();
+  private keyHeld = false;
 
   constructor(label: string, className: string) {
     this.element = h('button', { class: `pedal ${className}`, type: 'button' }, [
@@ -18,12 +19,18 @@ export class Pedal {
   }
 
   get pressed(): boolean {
-    return this.pointers.size > 0;
+    return this.pointers.size > 0 || this.keyHeld;
   }
 
   release(): void {
     this.pointers.clear();
+    this.keyHeld = false;
     this.element.classList.remove('pressed');
+  }
+
+  holdKey(down: boolean): void {
+    this.keyHeld = down;
+    this.element.classList.toggle('pressed', this.pressed);
   }
 
   private press(event: PointerEvent): void {
