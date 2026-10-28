@@ -1,0 +1,16 @@
+{
+  "name": "Drive Practice",
+  "short_name": "Drive Practice",
+  "description": "Calm practice for parking, reversing and tight spaces.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#1b222b",
+  "theme_color": "#1b222b",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
