@@ -1,5 +1,6 @@
 :root {
-  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, Roboto, 'Helvetica Neue', Arial, 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif;
   --ink: #1d252e;
   --ink-soft: #5b6672;
   --paper: #f3f1ec;
@@ -897,7 +898,7 @@ dd {
   display: none;
 }
 
-@media (orientation: portrait) and (max-width: 1100px) {
+@media (orientation: portrait) and (max-width: 1100px) and (hover: none) and (pointer: coarse) {
   .rotate-note {
     position: fixed;
     inset: 0;
@@ -917,5 +918,120 @@ dd {
   .hud-button.toggle span,
   .hud-button.back span {
     display: none;
+  }
+}
+
+.language-picker {
+  margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.language {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: rgba(29, 37, 46, 0.06);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.language.active {
+  background: var(--ink);
+  color: #fff;
+}
+
+.with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.with-icon .icon {
+  width: 20px;
+  height: 20px;
+}
+
+.secondary:disabled {
+  opacity: 0.45;
+}
+
+.card-actions {
+  flex-wrap: wrap;
+}
+
+.lesson-card {
+  width: min(780px, 100%);
+  padding: 26px 28px 24px;
+}
+
+.lesson-stage {
+  position: relative;
+  margin-top: 16px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #3b3e43;
+}
+
+.lesson-canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 26 / 14;
+  max-height: 46vh;
+}
+
+.lesson-stage .legend {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--light);
+}
+
+.lesson-stage .legend-title {
+  display: none;
+}
+
+.lesson-stage .legend ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.lesson-text {
+  margin-top: 16px;
+  min-height: 3em;
+  font-size: 19px;
+  line-height: 1.45;
+}
+
+.lesson-actions {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.lesson-counter {
+  margin-right: auto;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  .drive-panel {
+    width: auto;
+  }
+
+  .hint {
+    max-width: calc(100vw - 560px);
   }
 }

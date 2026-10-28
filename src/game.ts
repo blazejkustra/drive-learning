@@ -1,3 +1,4 @@
+import { classifyBump, type BumpKind } from './bump.ts';
 import { DEG, boxCorners, boxesOverlap, circleOverlapsBox, distance, dot, fromAngle, normalizeAngle, pointInBox, sub, type Box } from './geometry.ts';
 import type { Level, Obstacle, TargetZone } from './level-types.ts';
 import { CAR, carBox, carCentre, movePose, nextSpeed, poseFromCentre, type Gear, type Pedals, type Pose } from './physics.ts';
@@ -19,7 +20,7 @@ export interface Result {
 }
 
 export interface SessionEvents {
-  bump: (obstacle: Obstacle) => void;
+  bump: (obstacle: Obstacle, kind: BumpKind) => void;
   finish: (result: Result) => void;
   fail: () => void;
   gearBlocked: () => void;
@@ -115,9 +116,10 @@ export class GameSession {
     const step = distanceToTravel / steps;
     for (let i = 0; i < steps; i++) {
       const candidate = movePose(this.pose, step, this.steer);
-      const hit = this.findCollision(carBox(candidate));
+      const box = carBox(candidate);
+      const hit = this.findCollision(box);
       if (hit) {
-        this.registerBump(hit);
+        this.registerBump(hit, classifyBump(box, this.steer, Math.sign(step), hit));
         this.speed = 0;
         return;
       }
@@ -131,7 +133,7 @@ export class GameSession {
     return this.level.map.obstacles.find((obstacle) => overlapsObstacle(box, obstacle)) ?? null;
   }
 
-  private registerBump(obstacle: Obstacle): void {
+  private registerBump(obstacle: Obstacle, kind: BumpKind): void {
     const recent = this.lastBump !== null && this.time - this.lastBump.time < BUMP_COOLDOWN;
     const alreadyCounted = this.inContact || recent;
     this.inContact = true;
@@ -139,7 +141,7 @@ export class GameSession {
 
     this.touches += 1;
     this.lastBump = { obstacle, time: this.time };
-    this.events.bump(obstacle);
+    this.events.bump(obstacle, kind);
     if (this.level.maxTouches !== undefined && this.touches > this.level.maxTouches) {
       this.status = 'failed';
       this.events.fail();

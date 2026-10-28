@@ -1,4 +1,5 @@
 import { clamp } from '../geometry.ts';
+import { t } from '../i18n/index.ts';
 import { CAR } from '../physics.ts';
 import { h, svg } from '../ui/dom.ts';
 
@@ -30,7 +31,7 @@ export class SteeringWheel {
 
   constructor() {
     this.graphic = svg(WHEEL_SVG);
-    this.element = h('div', { class: 'wheel', role: 'slider', 'aria-label': 'Steering wheel' }, [this.graphic]);
+    this.element = h('div', { class: 'wheel', role: 'slider', 'aria-label': t().controls.steeringWheel }, [this.graphic]);
     this.element.addEventListener('pointerdown', (e) => this.grab(e));
     this.element.addEventListener('pointermove', (e) => this.drag(e));
     this.element.addEventListener('pointerup', (e) => this.release(e));

@@ -3,6 +3,8 @@ import type { Level, Marking, Obstacle, Surface } from '../level-types.ts';
 import { drawCarBody } from './car.ts';
 import { COLOURS, SURFACE_COLOURS } from './palette.ts';
 
+export type Scene = Pick<Level, 'bounds' | 'map'>;
+
 export function withBox(ctx: CanvasRenderingContext2D, box: Box, draw: () => void): void {
   ctx.save();
   ctx.translate(box.cx, box.cy);
@@ -16,7 +18,7 @@ function boxPath(ctx: CanvasRenderingContext2D, box: Box, radius = 0): void {
   ctx.roundRect(-box.halfLength, -box.halfWidth, box.halfLength * 2, box.halfWidth * 2, radius);
 }
 
-function drawGround(ctx: CanvasRenderingContext2D, level: Level): void {
+function drawGround(ctx: CanvasRenderingContext2D, level: Scene): void {
   const pad = 80;
   const { x, y, w, h } = level.bounds;
   if (level.map.ground === 'garage') {
@@ -199,13 +201,13 @@ export function obstacleOutline(ctx: CanvasRenderingContext2D, obstacle: Obstacl
   ctx.restore();
 }
 
-export function drawWorld(ctx: CanvasRenderingContext2D, level: Level): void {
+export function drawWorld(ctx: CanvasRenderingContext2D, level: Scene): void {
   drawGround(ctx, level);
   for (const surface of level.map.surfaces) drawSurface(ctx, surface);
   for (const marking of level.map.markings) drawMarking(ctx, marking);
 }
 
-export function drawObstacles(ctx: CanvasRenderingContext2D, level: Level): void {
+export function drawObstacles(ctx: CanvasRenderingContext2D, level: Scene): void {
   for (const obstacle of level.map.obstacles) drawShadow(ctx, obstacle);
   for (const obstacle of level.map.obstacles) drawObstacle(ctx, obstacle);
 }

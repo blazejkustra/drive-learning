@@ -1,11 +1,9 @@
+import type { LevelId } from './i18n/en.ts';
 import type { Chapter, Checkpoint, GroundKind, Level, MapData, StartPose, TargetZone } from './level-types.ts';
 import { MapBuilder, evenly } from './map-builder.ts';
 
 interface LevelSpec {
-  id: string;
-  title: string;
-  goal: string;
-  tips: string[];
+  id: LevelId;
   bounds: Level['bounds'];
   ground?: GroundKind;
   draw: (m: MapBuilder) => void;
@@ -36,9 +34,6 @@ function defineLevel(spec: LevelSpec): Level {
   addEdges(map, spec.bounds);
   return {
     id: spec.id,
-    title: spec.title,
-    goal: spec.goal,
-    tips: spec.tips,
     bounds: spec.bounds,
     map,
     start: spec.start,
@@ -80,18 +75,9 @@ function parallelStreet(m: MapBuilder): void {
 
 const basics: Chapter = {
   id: 'basics',
-  title: 'Getting to know the car',
-  summary: 'Gas, brake, steering and reverse in an empty space.',
   levels: [
     defineLevel({
       id: 'stop-on-the-line',
-      title: 'Drive and stop',
-      goal: 'Drive forward and stop with the whole car inside the green box.',
-      tips: [
-        'Tap D to choose Drive.',
-        'Let go of the gas and the car keeps creeping forward, just like a real automatic.',
-        'Hold the brake to stop inside the box.',
-      ],
       bounds: { x: 0, y: 0, w: 24, h: 36 },
       draw: (m) => {
         m.asphalt(8, 0, 8, 36).kerb(7.7, 0, 0.3, 36).kerb(16, 0, 0.3, 36);
@@ -106,13 +92,6 @@ const basics: Chapter = {
     }),
     defineLevel({
       id: 'gentle-curve',
-      title: 'A gentle curve',
-      goal: 'Follow the road around the bend and stop in the box.',
-      tips: [
-        'Turn the wheel a little and hold it there. The car follows a steady curve.',
-        'The blue lines show where your back wheels will go.',
-        'Straighten the wheel as the road straightens.',
-      ],
       bounds: { x: 0, y: 0, w: 36, h: 36 },
       draw: (m) => {
         m.asphalt(6, 20, 8, 16).ring('asphalt', 24, 20, 10, 18, 180, 270).asphalt(24, 2, 12, 8);
@@ -131,13 +110,6 @@ const basics: Chapter = {
     }),
     defineLevel({
       id: 'full-circle',
-      title: 'Full lock circle',
-      goal: 'Drive one full circle around the island and stop back in the box.',
-      tips: [
-        'Turn the wheel all the way to the left and keep it there.',
-        'The yellow line shows the front corner swinging wide on the outside.',
-        'The back wheels draw a smaller circle than the front wheels.',
-      ],
       bounds: { x: 4, y: 5, w: 24, h: 24 },
       draw: (m) => {
         m.asphalt(5, 6, 22, 22);
@@ -159,13 +131,6 @@ const basics: Chapter = {
     }),
     defineLevel({
       id: 'reverse-straight',
-      title: 'Reverse into a box',
-      goal: 'Reverse back into the painted box and stop.',
-      tips: [
-        'Tap R for Reverse. The car rolls slowly backwards.',
-        'The blue lines show where the back of the car is heading.',
-        'Keep the wheel almost straight and make small fixes.',
-      ],
       bounds: { x: 0, y: 0, w: 24, h: 36 },
       draw: (m) => {
         m.asphalt(4, 2, 16, 32);
@@ -183,18 +148,10 @@ const basics: Chapter = {
 
 const turning: Chapter = {
   id: 'turning',
-  title: 'Turning',
-  summary: 'Corners, gates and tight bends. Watch the back wheels cut in.',
+  lesson: 'turning',
   levels: [
     defineLevel({
       id: 'street-corner',
-      title: 'Turn at a street corner',
-      goal: 'Turn right into the side street without touching the kerb.',
-      tips: [
-        'Drive a little past the corner before you turn.',
-        'The back wheels cut inside the front wheels, so watch the inner kerb.',
-        'Straighten the wheel as the car lines up with the new street.',
-      ],
       bounds: { x: 0, y: 0, w: 34, h: 40 },
       draw: (m) => {
         m.asphalt(5, 0, 9, 40).asphalt(14, 9, 20, 9);
@@ -207,14 +164,32 @@ const turning: Chapter = {
       parTime: 40,
     }),
     defineLevel({
+      id: 'pillar-turn',
+      bounds: { x: 0, y: 0, w: 30, h: 38 },
+      ground: 'garage',
+      draw: (m) => {
+        m.surface('garage', 4, 0.5, 26, 37.5);
+        m.wall(3.6, 0, 0.4, 38).wall(3.6, 0, 26.4, 0.5);
+        const sideLines = evenly(14, 2.8, 9);
+        m.bayDividers(12, 17, sideLines);
+        sideLines.slice(0, -1).forEach((y, i) => {
+          if (i !== 3) m.car(14.6, y + 1.4, i % 2 === 0 ? 0 : 180);
+        });
+        m.wall(17, 13.6, 0.4, 24.4);
+        const northLines = evenly(12.6, 2.8, 7);
+        for (const x of northLines) m.line(x, 0.5, x, 5.5);
+        northLines.slice(0, -1).forEach((x, i) => {
+          if (i !== 2) m.car(x + 1.4, 3, i % 2 === 0 ? 90 : -90);
+        });
+        m.pillar(11.7, 13.7, 0.6).pillar(19.6, 5.8, 0.6).pillar(26.6, 5.8, 0.6);
+        m.arrow(8, 30, -90).arrow(22, 9.75, 0);
+      },
+      start: { x: 8, y: 32, heading: -90 },
+      target: { x: 25, y: 9.75, heading: 0, length: 6, width: 3.4, headingTolerance: 12 },
+      parTime: 40,
+    }),
+    defineLevel({
       id: 'narrow-gate',
-      title: 'Through a narrow gate',
-      goal: 'Turn through the gate into the yard and stop in the box.',
-      tips: [
-        'Keep to the far side of the road so you have room to swing in.',
-        'Start turning a little before you reach the gate.',
-        'Line up straight before the posts, then drive through slowly.',
-      ],
       bounds: { x: 0, y: 0, w: 26, h: 34 },
       draw: (m) => {
         m.asphalt(4, 0, 9, 34).kerb(3.7, 0, 0.3, 34).surface('pavement', 1, 0, 2.7, 34);
@@ -230,13 +205,6 @@ const turning: Chapter = {
     }),
     defineLevel({
       id: 'cone-slalom',
-      title: 'Cone slalom',
-      goal: 'Weave left and right of the cones through each marked gap.',
-      tips: [
-        'Small, early wheel turns work better than big, late ones.',
-        'Start turning back before you reach each cone.',
-        'Watch the yellow line: the front corner swings out wider than you expect.',
-      ],
       bounds: { x: 0, y: 0, w: 20, h: 44 },
       draw: (m) => {
         m.asphalt(4, 0, 12, 44).kerb(3.7, 0, 0.3, 44).kerb(16, 0, 0.3, 44);
@@ -256,13 +224,6 @@ const turning: Chapter = {
     }),
     defineLevel({
       id: 'u-turn',
-      title: 'U-turn in a wide street',
-      goal: 'Turn around in one go and stop in the box on the other side.',
-      tips: [
-        'Start from the right side of the road to get the widest turn.',
-        'Turn the wheel fully left before you start rolling.',
-        'Watch the front corner near the far kerb.',
-      ],
       bounds: { x: 0, y: 0, w: 22, h: 38 },
       draw: (m) => {
         m.asphalt(4, 0, 14, 38).kerb(3.7, 0, 0.3, 38).kerb(18, 0, 0.3, 38);
@@ -279,18 +240,9 @@ const turning: Chapter = {
 
 const reversing: Chapter = {
   id: 'reversing',
-  title: 'Reversing',
-  summary: 'Backing around corners and into tight openings.',
   levels: [
     defineLevel({
       id: 'reverse-corner',
-      title: 'Reverse around a corner',
-      goal: 'Reverse around the corner into the side street.',
-      tips: [
-        'When reversing, turn the wheel the way you want the back of the car to go.',
-        'Start turning when the back wheels reach the corner.',
-        'The front of the car swings the other way, so keep an eye on it.',
-      ],
       bounds: { x: 0, y: 0, w: 30, h: 32 },
       draw: (m) => {
         m.asphalt(4, 0, 8, 32).asphalt(12, 16, 18, 8);
@@ -304,13 +256,6 @@ const reversing: Chapter = {
     }),
     defineLevel({
       id: 'reverse-driveway',
-      title: 'Reverse into a driveway',
-      goal: 'Back into the driveway between the gate posts.',
-      tips: [
-        'Drive past the driveway, stop, then choose R.',
-        'Turn the wheel toward the driveway to send the back of the car in.',
-        'Straighten up once the car points along the driveway.',
-      ],
       bounds: { x: 0, y: 0, w: 26, h: 32 },
       draw: (m) => {
         m.asphalt(4, 0, 8, 32).kerb(3.7, 0, 0.3, 32).surface('pavement', 1, 0, 2.7, 32);
@@ -328,13 +273,6 @@ const reversing: Chapter = {
     }),
     defineLevel({
       id: 'reverse-out',
-      title: 'Reverse out of a space',
-      goal: 'Back out of the parking space and drive off along the lane.',
-      tips: [
-        'Reverse straight until your front bumper is clear of the cars beside you.',
-        'Then turn so the back of the car swings toward where you came from.',
-        'The front swings out toward the next car, so watch the yellow line.',
-      ],
       bounds: { x: 0, y: 0, w: 24, h: 30 },
       draw: (m) => {
         m.asphalt(4, 0, 14, 30).wall(3.6, 0, 0.4, 30).kerb(18, 0, 0.3, 30);
@@ -356,18 +294,9 @@ const reversing: Chapter = {
 
 const parking: Chapter = {
   id: 'parking',
-  title: 'Parking',
-  summary: 'Supermarket bays, angled spaces and parallel parking on a street.',
   levels: [
     defineLevel({
       id: 'bay-forward',
-      title: 'Park forwards in a bay',
-      goal: 'Drive forwards into the empty space on the left.',
-      tips: [
-        'Keep to the right side of the lane to get a wider swing.',
-        'Turn fully when your front bumper passes the near line of the space.',
-        'The back wheels cut the corner, so watch the car on the inside.',
-      ],
       bounds: { x: 0, y: 0, w: 24, h: 36 },
       draw: (m) => bayLot(m, [3, 8], [1, 7]),
       start: { x: 14, y: 32, heading: -90 },
@@ -376,13 +305,6 @@ const parking: Chapter = {
     }),
     defineLevel({
       id: 'bay-reverse',
-      title: 'Reverse into a bay',
-      goal: 'Back into the empty space on the left, between the two cars.',
-      tips: [
-        'Drive on until the space is about one car length behind you.',
-        'Choose R and turn the wheel fully left to send the back into the space.',
-        'Straighten the wheel when the car is parallel with the lines.',
-      ],
       bounds: { x: 0, y: 0, w: 24, h: 36 },
       draw: (m) => bayLot(m, [5, 9], [2, 8]),
       start: { x: 13, y: 30, heading: -90 },
@@ -391,13 +313,6 @@ const parking: Chapter = {
     }),
     defineLevel({
       id: 'angled-bay',
-      title: 'Angled parking',
-      goal: 'Turn into the empty angled space.',
-      tips: [
-        'Angled spaces need only a gentle turn.',
-        'Start turning when your seat is level with the near line of the space.',
-        'Straighten the wheel as the car lines up with the space.',
-      ],
       bounds: { x: 0, y: 0, w: 22, h: 38 },
       draw: (m) => {
         m.asphalt(4.2, 0, 10.8, 38).kerb(3.9, 0, 0.3, 38).kerb(15, 0, 0.3, 38);
@@ -416,13 +331,6 @@ const parking: Chapter = {
     }),
     defineLevel({
       id: 'parallel-park',
-      title: 'Parallel parking',
-      goal: 'Reverse into the gap between the two parked cars, close to the kerb.',
-      tips: [
-        'Stop beside the front car with your back bumpers level.',
-        'Reverse with the wheel fully right until the car sits at about 45 degrees.',
-        'Then turn fully left and keep reversing to bring the front in.',
-      ],
       bounds: { x: 0, y: 0, w: 22, h: 34 },
       draw: (m) => {
         parallelStreet(m);
@@ -434,13 +342,6 @@ const parking: Chapter = {
     }),
     defineLevel({
       id: 'leave-parallel',
-      title: 'Leaving a parallel space',
-      goal: 'Pull out of the space and into the lane ahead.',
-      tips: [
-        'Reverse a little first to give yourself room in front.',
-        'Turn the wheel fully left before you move forward.',
-        'Watch the yellow line clear the car in front, and the back swing toward the kerb.',
-      ],
       bounds: { x: 0, y: 0, w: 22, h: 34 },
       draw: (m) => {
         parallelStreet(m);
@@ -455,18 +356,9 @@ const parking: Chapter = {
 
 const tightSpots: Chapter = {
   id: 'tight-spots',
-  title: 'Tight everyday spots',
-  summary: 'Dead ends, garages, ramps and awkward neighbours.',
   levels: [
     defineLevel({
       id: 'three-point-turn',
-      title: 'Three-point turn',
-      goal: 'Turn around in the dead-end street and stop in the box.',
-      tips: [
-        'Forward with the wheel fully left, stop before the kerb.',
-        'Reverse with the wheel fully right, stop before the other kerb.',
-        'Then forward again. You can turn the wheel while the car stands still.',
-      ],
       bounds: { x: 0, y: 0, w: 20, h: 34 },
       draw: (m) => {
         m.asphalt(6, 2, 7.5, 32);
@@ -482,13 +374,6 @@ const tightSpots: Chapter = {
     }),
     defineLevel({
       id: 'garage-pillars',
-      title: 'Underground garage',
-      goal: 'Reverse into the space next to the pillar.',
-      tips: [
-        'Pillars sit inside the space, so the opening is narrower than the lines.',
-        'Drive a bit further past the space than usual before reversing.',
-        'Watch the back corner of the car pass the pillar.',
-      ],
       bounds: { x: 0, y: 0, w: 22, h: 36 },
       ground: 'garage',
       draw: (m) => {
@@ -510,13 +395,6 @@ const tightSpots: Chapter = {
     }),
     defineLevel({
       id: 'home-garage',
-      title: 'Narrow home garage',
-      goal: 'Drive into the garage and stop before the back wall.',
-      tips: [
-        'Line the car up while you still have room in the driveway.',
-        'Use small wheel movements, then let the car roll straight.',
-        'Creep in slowly and stop before the back wall.',
-      ],
       bounds: { x: 0, y: 0, w: 24, h: 32 },
       draw: (m) => {
         m.surface('pavement', 8.7, 8, 6.6, 24).surface('concrete', 10.75, 2, 2.5, 6);
@@ -531,13 +409,6 @@ const tightSpots: Chapter = {
     }),
     defineLevel({
       id: 'ramp-turn',
-      title: 'Car park ramp',
-      goal: 'Follow the ramp around the half circle and stop in the box.',
-      tips: [
-        'Keep a steady, gentle speed and hold the wheel still through the bend.',
-        'Stay in the middle: the front corner swings out and the back wheels cut in.',
-        'Straighten the wheel as you come out of the bend.',
-      ],
       bounds: { x: 3, y: 2, w: 22, h: 34 },
       ground: 'garage',
       draw: (m) => {
@@ -554,13 +425,6 @@ const tightSpots: Chapter = {
     }),
     defineLevel({
       id: 'crooked-neighbour',
-      title: 'Badly parked neighbour',
-      goal: 'Reverse into the space next to the car parked over the line.',
-      tips: [
-        'The car on your right is over the line, so keep a little closer to the car on your left.',
-        'Plan your turn the same way as a normal bay.',
-        'This one counts: more than two touches and you try again.',
-      ],
       bounds: { x: 0, y: 0, w: 24, h: 36 },
       draw: (m) => {
         bayLot(m, [5, 6, 9], [2]);

@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.ts';
 import type { Gear } from '../physics.ts';
 import { h, onPress } from '../ui/dom.ts';
 
@@ -46,18 +47,22 @@ export class Pedal {
   }
 }
 
-const GEAR_LABELS: Record<Gear, string> = { P: 'Park', R: 'Reverse', D: 'Drive' };
+function gearLabel(gear: Gear): string {
+  const controls = t().controls;
+  if (gear === 'P') return controls.park;
+  return gear === 'R' ? controls.reverse : controls.drive;
+}
 
 export class GearSelector {
   readonly element: HTMLElement;
   private readonly buttons = new Map<Gear, HTMLButtonElement>();
 
   constructor(onSelect: (gear: Gear) => void) {
-    this.element = h('div', { class: 'gears', role: 'group', 'aria-label': 'Gear' });
+    this.element = h('div', { class: 'gears', role: 'group', 'aria-label': t().controls.gear });
     for (const gear of ['P', 'R', 'D'] as const) {
-      const button = h('button', { class: 'gear', type: 'button', 'aria-label': GEAR_LABELS[gear] }, [
+      const button = h('button', { class: 'gear', type: 'button', 'aria-label': gearLabel(gear) }, [
         h('span', { class: 'gear-letter' }, [gear]),
-        h('span', { class: 'gear-name' }, [GEAR_LABELS[gear]]),
+        h('span', { class: 'gear-name' }, [gearLabel(gear)]),
       ]);
       onPress(button, () => onSelect(gear));
       this.buttons.set(gear, button);

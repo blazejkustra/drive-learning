@@ -6,7 +6,9 @@ A calm driving practice game for iPad. It teaches how a car really moves in tigh
 
 You steer with a large on-screen wheel (about 1.5 turns lock to lock), pick P, R or D, and use the gas and brake pedals with your other hand. Guide lines show where each wheel and the swinging front corner will go, a marker shows the point the car turns around, and a fading trail shows where the wheels actually went.
 
-21 short levels in five chapters build up from driving in a straight line to parallel parking, a three-point turn, an underground garage and a car park ramp. Progress and stars are saved on the device.
+22 short levels in five chapters build up from driving in a straight line to parallel parking, a three-point turn, an underground garage and a car park ramp. A short animated lesson before the turning chapter shows why the back of the car cuts inside a corner. Progress and stars are saved on the device.
+
+The game speaks English, Spanish, German, Polish and Chinese (Simplified). It picks the browser language and can be switched on the home screen.
 
 ## Play it
 
@@ -44,6 +46,7 @@ npm run preview
 - `src/levels.ts`: all levels as data, built with helpers from `src/map-builder.ts`
 - `src/render/`: canvas drawing for the map, cars and teaching overlays
 - `src/input/`: steering wheel, pedals and gear selector
-- `src/ui/`: home screen and play screen
+- `src/ui/`: home screen, play screen and the turning lesson
+- `src/i18n/`: all text, one file per language; `en.ts` defines the keys the others must match
 
-To add a level, add an entry to a chapter in `src/levels.ts`. Coordinates are in metres with y pointing down; headings are in degrees (0 east, 90 south, -90 north). `npm run check-levels` runs a small path planner over every level to confirm each one can be solved without touching anything.
+To add a level, add an entry to a chapter in `src/levels.ts` and its title, goal and tips under `levels` in every file in `src/i18n/`. Coordinates are in metres with y pointing down; headings are in degrees (0 east, 90 south, -90 north). `npm run check-levels` runs a small path planner over every level to confirm each one can be solved without touching anything.

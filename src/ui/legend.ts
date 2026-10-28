@@ -1,19 +1,18 @@
+import { t } from '../i18n/index.ts';
 import { h } from './dom.ts';
 
-const ENTRIES = [
-  { swatch: 'rear', text: 'Back wheels' },
-  { swatch: 'front', text: 'Front wheels' },
-  { swatch: 'swing', text: 'Front corner swing' },
-  { swatch: 'pivot', text: 'Turning point' },
-];
+export type Swatch = 'rear' | 'front' | 'swing' | 'pivot';
 
-export function guideLegend(): HTMLElement {
+const ALL_SWATCHES: Swatch[] = ['rear', 'front', 'swing', 'pivot'];
+
+export function guideLegend(swatches: Swatch[] = ALL_SWATCHES): HTMLElement {
+  const legend = t().legend;
   return h('div', { class: 'legend' }, [
-    h('p', { class: 'legend-title' }, ['Guide lines']),
+    h('p', { class: 'legend-title' }, [legend.title]),
     h(
       'ul',
       {},
-      ENTRIES.map((entry) => h('li', {}, [h('span', { class: `swatch ${entry.swatch}` }), entry.text])),
+      swatches.map((swatch) => h('li', {}, [h('span', { class: `swatch ${swatch}` }), legend[swatch]])),
     ),
   ]);
 }

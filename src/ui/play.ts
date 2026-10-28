@@ -3,15 +3,18 @@ import { GameSession, type Result } from '../game.ts';
 import { KeyboardControls, type PedalName } from '../input/keyboard.ts';
 import { GearSelector, Pedal } from '../input/pedals.ts';
 import { SteeringWheel } from '../input/steering-wheel.ts';
+import type { BumpKind } from '../bump.ts';
+import { chapterText, levelText, t } from '../i18n/index.ts';
 import type { Level, Obstacle } from '../level-types.ts';
 import { LEVELS, chapterOf } from '../levels.ts';
 import { carCentre, steerFromWheel, type Gear } from '../physics.ts';
 import { Camera, type Viewport } from '../render/camera.ts';
 import { drawScene } from '../render/scene.ts';
-import { getSettings, isUnlocked, recordResult } from '../storage.ts';
+import { getSettings, isUnlocked, lessonSeen, markLessonSeen, recordResult } from '../storage.ts';
 import { formatTime, h, onTap } from './dom.ts';
 import { icons, starRow } from './icons.ts';
 import { guideLegend } from './legend.ts';
+import { TurningLesson } from './lesson.ts';
 
 export interface PlayCallbacks {
   exit: () => void;
@@ -22,19 +25,6 @@ type CameraMode = 'fit' | 'follow';
 
 const BUMP_FLASH_SECONDS = 0.9;
 const TOAST_SECONDS = 2.6;
-
-const OBSTACLE_NAMES: Partial<Record<Obstacle['kind'], string>> = {
-  kerb: 'the kerb',
-  wall: 'the wall',
-  hedge: 'the hedge',
-  building: 'the building',
-  car: 'a parked car',
-  cone: 'a cone',
-  pillar: 'a pillar',
-  post: 'a gate post',
-  planter: 'a tree',
-  edge: 'the edge of the practice area',
-};
 
 function toggleButton(label: string, icon: SVGSVGElement): HTMLButtonElement {
   return h('button', { class: 'hud-button toggle', type: 'button', 'aria-pressed': 'false' }, [icon, h('span', {}, [label])]);
@@ -48,17 +38,23 @@ function setToggle(button: HTMLButtonElement, on: boolean, label?: string): void
 
 function steerDescription(steerDeg: number): string {
   const amount = Math.round(Math.abs(steerDeg));
-  if (amount === 0) return 'Straight';
-  return `${amount}° ${steerDeg > 0 ? 'right' : 'left'}`;
+  const hud = t().hud;
+  if (amount === 0) return hud.straight;
+  return steerDeg > 0 ? hud.steerRight(amount) : hud.steerLeft(amount);
 }
 
 function resultHeading(stars: number): string {
-  if (stars === 3) return 'Perfect';
-  if (stars === 2) return 'Nicely done';
-  return 'You made it';
+  const result = t().result;
+  if (stars === 3) return result.perfect;
+  if (stars === 2) return result.nicelyDone;
+  return result.madeIt;
 }
 
-const ALIGNMENT_TEXT = { great: 'Neatly lined up', good: 'Lined up', crooked: 'A little crooked' };
+function bumpMessage(obstacle: Obstacle, kind: BumpKind): string {
+  const bump = t().bump;
+  if (kind === 'general') return `${bump.into[obstacle.kind]} ${bump.backOff}`;
+  return bump[kind];
+}
 
 export class PlayScreen {
   readonly element: HTMLElement;
@@ -69,8 +65,8 @@ export class PlayScreen {
   private readonly ctx: CanvasRenderingContext2D;
   private readonly camera = new Camera();
   private readonly wheel = new SteeringWheel();
-  private readonly gas = new Pedal('Gas', 'gas');
-  private readonly brake = new Pedal('Brake', 'brake');
+  private readonly gas = new Pedal(t().controls.gas, 'gas');
+  private readonly brake = new Pedal(t().controls.brake, 'brake');
   private readonly gears: GearSelector;
   private readonly keyboard: KeyboardControls;
 
@@ -87,7 +83,8 @@ export class PlayScreen {
   private showGuides: boolean;
   private showTrail = true;
   private slowMotion = false;
-  private cameraMode: CameraMode = 'fit';
+  private cameraMode: CameraMode = 'follow';
+  private lesson: TurningLesson | null = null;
   private tipIndex = 0;
   private paused = true;
   private frameHandle = 0;
@@ -101,11 +98,11 @@ export class PlayScreen {
     this.callbacks = callbacks;
     this.showGuides = level.guides;
     this.session = new GameSession(level, {
-      bump: (obstacle) => this.onBump(obstacle),
+      bump: (obstacle, kind) => this.onBump(obstacle, kind),
       finish: (result) => this.onFinish(result),
       fail: () => this.onFail(),
-      gearBlocked: () => this.showToast('Stop the car first, then change gear.'),
-      checkpoint: (index, total) => this.showToast(index === total ? 'All gaps done. Now head for the box.' : `Gap ${index} of ${total} done.`, 'good'),
+      gearBlocked: () => this.showToast(t().toasts.stopFirst),
+      checkpoint: (index, total) => this.showToast(index === total ? t().toasts.allGapsDone : t().toasts.gapDone(index, total), 'good'),
     });
 
     this.canvas = h('canvas', { class: 'scene' });
@@ -117,24 +114,26 @@ export class PlayScreen {
       gear: (gear) => this.selectGear(gear),
     });
 
-    this.tipText = h('span', { class: 'tip-text' }, [level.tips[0]]);
-    const nextTip = h('button', { class: 'tip-next', type: 'button', 'aria-label': 'Next tip' }, [icons.next()]);
+    const text = levelText(level);
+    const hudText = t().hud;
+    this.tipText = h('span', { class: 'tip-text' }, [text.tips[0]]);
+    const nextTip = h('button', { class: 'tip-next', type: 'button', 'aria-label': hudText.nextTip }, [icons.next()]);
     onTap(nextTip, () => this.cycleTip());
 
-    const back = h('button', { class: 'hud-button back', type: 'button' }, [icons.back(), h('span', {}, ['Levels'])]);
+    const back = h('button', { class: 'hud-button back', type: 'button' }, [icons.back(), h('span', {}, [hudText.levels])]);
     onTap(back, () => this.callbacks.exit());
 
     this.toggles = {
-      guides: toggleButton('Guides', icons.guides()),
-      trail: toggleButton('Trail', icons.trail()),
-      camera: toggleButton('Whole area', icons.camera()),
-      slow: toggleButton('Slow', icons.slow()),
+      guides: toggleButton(hudText.guides, icons.guides()),
+      trail: toggleButton(hudText.trail, icons.trail()),
+      camera: toggleButton(hudText.wholeArea, icons.camera()),
+      slow: toggleButton(hudText.slow, icons.slow()),
     };
     onTap(this.toggles.guides, () => this.setGuides(!this.showGuides));
     onTap(this.toggles.trail, () => this.setTrail(!this.showTrail));
     onTap(this.toggles.camera, () => this.setCamera(this.cameraMode === 'fit' ? 'follow' : 'fit'));
     onTap(this.toggles.slow, () => this.setSlow(!this.slowMotion));
-    const restart = h('button', { class: 'hud-button', type: 'button' }, [icons.restart(), h('span', {}, ['Restart'])]);
+    const restart = h('button', { class: 'hud-button', type: 'button' }, [icons.restart(), h('span', {}, [hudText.restart])]);
     onTap(restart, () => this.callbacks.play(this.level));
 
     this.hint = h('span', { class: 'hint-text' });
@@ -147,7 +146,7 @@ export class PlayScreen {
       speed: h('strong', {}, ['0']),
     };
 
-    this.steerValue = h('strong', { class: 'steer-value' }, ['Straight']);
+    this.steerValue = h('strong', { class: 'steer-value' }, [hudText.straight]);
     this.steerMarker = h('span', { class: 'steer-marker' });
 
     const chapter = chapterOf(level);
@@ -156,8 +155,11 @@ export class PlayScreen {
     const hud = h('header', { class: 'hud' }, [
       back,
       h('div', { class: 'hud-title' }, [
-        h('div', { class: 'hud-heading' }, [h('strong', {}, [level.title]), h('span', { class: 'hud-sub' }, [`${chapter.title}, level ${levelNumber}`])]),
-        h('div', { class: 'tip' }, [this.tipText, level.tips.length > 1 && nextTip]),
+        h('div', { class: 'hud-heading' }, [
+          h('strong', {}, [text.title]),
+          h('span', { class: 'hud-sub' }, [t().levelOf(chapterText(chapter).title, levelNumber)]),
+        ]),
+        h('div', { class: 'tip' }, [this.tipText, text.tips.length > 1 && nextTip]),
       ]),
       h('div', { class: 'hud-toggles' }, [this.toggles.guides, this.toggles.trail, this.toggles.camera, this.toggles.slow, restart]),
     ]);
@@ -165,7 +167,7 @@ export class PlayScreen {
     const steerPanel = h('aside', { class: 'panel steer-panel' }, [
       guideLegend(),
       h('div', { class: 'steer-readout' }, [
-        h('span', { class: 'steer-label' }, ['Front wheels']),
+        h('span', { class: 'steer-label' }, [hudText.frontWheels]),
         this.steerValue,
         h('div', { class: 'steer-gauge' }, [h('span', { class: 'steer-centre' }), this.steerMarker]),
       ]),
@@ -174,12 +176,12 @@ export class PlayScreen {
 
     const drivePanel = h('aside', { class: 'panel drive-panel' }, [
       h('dl', { class: 'stats' }, [
-        h('div', {}, [h('dt', {}, ['Time']), h('dd', {}, [this.stats.time])]),
-        h('div', {}, [h('dt', {}, ['Touches']), h('dd', {}, [this.stats.touches, level.maxTouches !== undefined && h('span', { class: 'limit' }, [` / ${level.maxTouches}`])])]),
-        h('div', {}, [h('dt', {}, ['km/h']), h('dd', {}, [this.stats.speed])]),
+        h('div', {}, [h('dt', {}, [hudText.time]), h('dd', {}, [this.stats.time])]),
+        h('div', {}, [h('dt', {}, [hudText.touches]), h('dd', {}, [this.stats.touches, level.maxTouches !== undefined && h('span', { class: 'limit' }, [` / ${level.maxTouches}`])])]),
+        h('div', {}, [h('dt', {}, [hudText.speedUnit]), h('dd', {}, [this.stats.speed])]),
       ]),
       h('div', { class: 'controls' }, [this.gears.element, this.brake.element, this.gas.element]),
-      h('p', { class: 'key-hint' }, ['W gas · S brake · R/D/P gear']),
+      h('p', { class: 'key-hint' }, [hudText.keyHint]),
     ]);
 
     this.overlay = h('div', { class: 'overlay hidden' });
@@ -208,6 +210,7 @@ export class PlayScreen {
 
   start(): void {
     this.resize();
+    this.camera.follow(carCentre(this.session.pose), this.viewport(), 1);
     this.lastFrame = performance.now();
     this.frameHandle = requestAnimationFrame(this.frame);
   }
@@ -216,6 +219,7 @@ export class PlayScreen {
     cancelAnimationFrame(this.frameHandle);
     this.resizeObserver.disconnect();
     this.keyboard.destroy();
+    this.lesson?.destroy();
     window.clearTimeout(this.toastTimer);
   }
 
@@ -288,12 +292,13 @@ export class PlayScreen {
 
   private currentHint(): string {
     const s = this.session;
+    const hints = t().hints;
     if (s.status !== 'driving') return '';
-    if (!s.started) return 'Choose D to drive forward or R to reverse.';
-    if (s.aligned) return s.gear === 'P' || s.pedals.brake ? 'Hold still...' : 'Lined up. Hold the brake to finish.';
-    if (s.inTarget) return 'Almost. Straighten the car to match the arrow in the box.';
+    if (!s.started) return hints.chooseGear;
+    if (s.aligned) return s.gear === 'P' || s.pedals.brake ? hints.holdStill : hints.linedUp;
+    if (s.inTarget) return hints.almost;
     const remaining = this.level.checkpoints.length - s.checkpointsPassed;
-    if (remaining > 0) return `Drive through the marked gap ${s.checkpointsPassed + 1} of ${this.level.checkpoints.length}.`;
+    if (remaining > 0) return hints.driveGap(s.checkpointsPassed + 1, this.level.checkpoints.length);
     return '';
   }
 
@@ -311,8 +316,9 @@ export class PlayScreen {
   }
 
   private cycleTip(): void {
-    this.tipIndex = (this.tipIndex + 1) % this.level.tips.length;
-    this.tipText.textContent = this.level.tips[this.tipIndex];
+    const tips = levelText(this.level).tips;
+    this.tipIndex = (this.tipIndex + 1) % tips.length;
+    this.tipText.textContent = tips[this.tipIndex];
   }
 
   private setGuides(on: boolean): void {
@@ -327,7 +333,7 @@ export class PlayScreen {
 
   private setCamera(mode: CameraMode): void {
     this.cameraMode = mode;
-    setToggle(this.toggles.camera, mode === 'follow', mode === 'fit' ? 'Whole area' : 'Follow car');
+    setToggle(this.toggles.camera, mode === 'follow', mode === 'fit' ? t().hud.wholeArea : t().hud.followCar);
   }
 
   private setSlow(on: boolean): void {
@@ -342,11 +348,10 @@ export class PlayScreen {
     this.toastTimer = window.setTimeout(() => this.toast.classList.remove('visible'), TOAST_SECONDS * 1000);
   }
 
-  private onBump(obstacle: Obstacle): void {
-    const name = OBSTACLE_NAMES[obstacle.kind] ?? 'something';
+  private onBump(obstacle: Obstacle, kind: BumpKind): void {
     const limit = this.level.maxTouches;
-    const extra = limit !== undefined ? ` (${this.session.touches} of ${limit} allowed)` : '';
-    this.showToast(`Gentle bump into ${name}${extra}. Back off a little and try again.`);
+    const allowed = limit !== undefined ? ` ${t().bump.allowed(this.session.touches, limit)}` : '';
+    this.showToast(`${bumpMessage(obstacle, kind)}${allowed}`);
   }
 
   private openOverlay(card: HTMLElement): void {
@@ -363,48 +368,73 @@ export class PlayScreen {
 
   private showIntro(): void {
     const chapter = chapterOf(this.level);
-    const startButton = h('button', { class: 'primary', type: 'button' }, ['Start driving']);
+    if (chapter.lesson && !lessonSeen(chapter.lesson)) {
+      this.showLesson();
+      return;
+    }
+    const copy = t().intro;
+    const text = levelText(this.level);
+    const startButton = h('button', { class: 'primary', type: 'button' }, [copy.startDriving]);
     onTap(startButton, () => {
       this.closeOverlay();
       this.paused = false;
     });
+    const lessonButton = chapter.lesson && h('button', { class: 'secondary with-icon', type: 'button' }, [icons.guides(), copy.howTurningWorks]);
+    if (lessonButton) onTap(lessonButton, () => this.showLesson());
     this.openOverlay(
       h('div', { class: 'card intro-card' }, [
-        h('h2', {}, [this.level.title]),
-        h('p', { class: 'card-sub' }, [`${chapter.title}, level ${LEVELS.indexOf(this.level) + 1} of ${LEVELS.length}`]),
-        h('p', { class: 'goal' }, [this.level.goal]),
-        h('ul', { class: 'tips' }, this.level.tips.map((tip) => h('li', {}, [tip]))),
-        this.level.maxTouches !== undefined && h('p', { class: 'strict' }, [`Allowed touches: ${this.level.maxTouches}.`]),
-        h('div', { class: 'card-actions' }, [startButton]),
+        h('h2', {}, [text.title]),
+        h('p', { class: 'card-sub' }, [t().levelOfTotal(chapterText(chapter).title, LEVELS.indexOf(this.level) + 1, LEVELS.length)]),
+        h('p', { class: 'goal' }, [text.goal]),
+        h('ul', { class: 'tips' }, text.tips.map((tip) => h('li', {}, [tip]))),
+        this.level.maxTouches !== undefined && h('p', { class: 'strict' }, [copy.allowedTouches(this.level.maxTouches)]),
+        h('div', { class: 'card-actions' }, [lessonButton, startButton]),
       ]),
     );
+  }
+
+  private showLesson(): void {
+    const lessonId = chapterOf(this.level).lesson;
+    if (!lessonId) return;
+    this.lesson?.destroy();
+    this.lesson = new TurningLesson(() => this.finishLesson());
+    this.openOverlay(this.lesson.element);
+    this.lesson.start();
+    markLessonSeen(lessonId);
+  }
+
+  private finishLesson(): void {
+    this.lesson?.destroy();
+    this.lesson = null;
+    this.showIntro();
   }
 
   private onFinish(result: Result): void {
     recordResult(this.level.id, result.stars, result.time);
     const next = LEVELS[LEVELS.indexOf(this.level) + 1];
     const actions: HTMLElement[] = [];
-    const retry = h('button', { class: 'secondary', type: 'button' }, ['Try again']);
+    const copy = t().result;
+    const retry = h('button', { class: 'secondary', type: 'button' }, [copy.tryAgain]);
     onTap(retry, () => this.callbacks.play(this.level));
-    const levels = h('button', { class: 'secondary', type: 'button' }, ['All levels']);
+    const levels = h('button', { class: 'secondary', type: 'button' }, [copy.allLevels]);
     onTap(levels, () => this.callbacks.exit());
     actions.push(levels, retry);
     if (next && isUnlocked(next.id)) {
-      const nextButton = h('button', { class: 'primary', type: 'button' }, ['Next level']);
+      const nextButton = h('button', { class: 'primary', type: 'button' }, [copy.nextLevel]);
       onTap(nextButton, () => this.callbacks.play(next));
       actions.push(nextButton);
     }
-    const touchesText = result.touches === 0 ? 'No touches' : result.touches === 1 ? '1 touch' : `${result.touches} touches`;
-    const timeText = `${formatTime(result.time)}${result.time > this.level.parTime ? ` (aim for ${formatTime(this.level.parTime)})` : ''}`;
+    const touchesText = result.touches === 0 ? copy.noTouches : copy.touchCount(result.touches);
+    const timeText = `${formatTime(result.time)}${result.time > this.level.parTime ? ` (${copy.aimFor(formatTime(this.level.parTime))})` : ''}`;
     window.setTimeout(() => {
       this.openOverlay(
         h('div', { class: 'card result-card' }, [
           h('h2', {}, [resultHeading(result.stars)]),
           starRow(result.stars, 3, 'stars big'),
           h('dl', { class: 'result-stats' }, [
-            h('div', {}, [h('dt', {}, ['Time']), h('dd', {}, [timeText])]),
-            h('div', {}, [h('dt', {}, ['Touches']), h('dd', {}, [touchesText])]),
-            h('div', {}, [h('dt', {}, ['Position']), h('dd', {}, [ALIGNMENT_TEXT[result.alignment.quality]])]),
+            h('div', {}, [h('dt', {}, [copy.time]), h('dd', {}, [timeText])]),
+            h('div', {}, [h('dt', {}, [copy.touches]), h('dd', {}, [touchesText])]),
+            h('div', {}, [h('dt', {}, [copy.position]), h('dd', {}, [copy[result.alignment.quality]])]),
           ]),
           h('div', { class: 'card-actions' }, actions),
         ]),
@@ -413,14 +443,15 @@ export class PlayScreen {
   }
 
   private onFail(): void {
-    const retry = h('button', { class: 'primary', type: 'button' }, ['Try again']);
+    const copy = t().result;
+    const retry = h('button', { class: 'primary', type: 'button' }, [copy.tryAgain]);
     onTap(retry, () => this.callbacks.play(this.level));
-    const levels = h('button', { class: 'secondary', type: 'button' }, ['All levels']);
+    const levels = h('button', { class: 'secondary', type: 'button' }, [copy.allLevels]);
     onTap(levels, () => this.callbacks.exit());
     this.openOverlay(
       h('div', { class: 'card result-card' }, [
-        h('h2', {}, ['Let’s try that one again']),
-        h('p', { class: 'goal' }, ['That was one touch too many for this spot. Take it slower and lean on the guide lines.']),
+        h('h2', {}, [copy.failTitle]),
+        h('p', { class: 'goal' }, [copy.failBody]),
         h('div', { class: 'card-actions' }, [levels, retry]),
       ]),
     );

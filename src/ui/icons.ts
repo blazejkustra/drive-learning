@@ -1,3 +1,4 @@
+import { t } from '../i18n/index.ts';
 import { svg } from './dom.ts';
 
 function icon(paths: string): SVGSVGElement {
@@ -21,7 +22,7 @@ export const icons = {
 export function starRow(filled: number, total = 3, className = 'stars'): HTMLElement {
   const row = document.createElement('span');
   row.className = className;
-  row.setAttribute('aria-label', `${filled} of ${total} stars`);
+  row.setAttribute('aria-label', t().starsLabel(filled, total));
   for (let i = 0; i < total; i++) {
     row.append(
       svg(`<svg class="star ${i < filled ? 'on' : 'off'}" viewBox="0 0 24 24" aria-hidden="true">

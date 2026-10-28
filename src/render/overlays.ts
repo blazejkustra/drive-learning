@@ -1,5 +1,6 @@
 import { DEG, distance, type Vec } from '../geometry.ts';
 import type { GuidePaths } from '../guides.ts';
+import { t } from '../i18n/index.ts';
 import type { Checkpoint, Obstacle, TargetZone } from '../level-types.ts';
 import type { Pose } from '../physics.ts';
 import type { TrailSample } from '../trail.ts';
@@ -111,15 +112,17 @@ export function drawGuides(ctx: CanvasRenderingContext2D, paths: GuidePaths, ste
   ctx.lineWidth = camera.px(4);
   for (const path of paths.rearWheels) polyline(ctx, path);
 
-  if (Math.abs(steer) > 0.5 * DEG) {
-    ctx.strokeStyle = COLOURS.swingPath;
-    ctx.lineWidth = camera.px(3);
-    ctx.setLineDash([camera.px(9), camera.px(6)]);
-    polyline(ctx, paths.swingCorner);
-    ctx.setLineDash([]);
-  }
+  if (Math.abs(steer) > 0.5 * DEG) drawSwingPath(ctx, paths.swingCorner, camera);
   ctx.lineCap = 'butt';
   drawGhostCar(ctx, paths.endPose, camera.px(1));
+}
+
+export function drawSwingPath(ctx: CanvasRenderingContext2D, points: Vec[], camera: Camera): void {
+  ctx.strokeStyle = COLOURS.swingPath;
+  ctx.lineWidth = camera.px(3);
+  ctx.setLineDash([camera.px(9), camera.px(6)]);
+  polyline(ctx, points);
+  ctx.setLineDash([]);
 }
 
 export function drawPivot(ctx: CanvasRenderingContext2D, pivot: Vec | null, pose: Pose, camera: Camera): void {
@@ -147,7 +150,7 @@ export function drawPivot(ctx: CanvasRenderingContext2D, pivot: Vec | null, pose
   ctx.moveTo(pivot.x, pivot.y - r * 0.55);
   ctx.lineTo(pivot.x, pivot.y + r * 0.55);
   ctx.stroke();
-  drawWorldLabel(ctx, camera, { x: pivot.x, y: pivot.y + camera.px(22) }, 'turning point', 'rgba(255, 255, 255, 0.9)', 13);
+  drawWorldLabel(ctx, camera, { x: pivot.x, y: pivot.y + camera.px(22) }, t().legend.pivotLabel, 'rgba(255, 255, 255, 0.9)', 13);
 }
 
 export function drawBumpHighlight(ctx: CanvasRenderingContext2D, obstacle: Obstacle, strength: number, camera: Camera): void {
@@ -163,7 +166,7 @@ export function drawWorldLabel(ctx: CanvasRenderingContext2D, camera: Camera, at
   ctx.translate(at.x, at.y);
   const s = camera.px(1);
   ctx.scale(s, s);
-  ctx.font = `600 ${sizePx}px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif`;
+  ctx.font = `600 ${sizePx}px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineWidth = 3;

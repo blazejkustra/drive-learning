@@ -1,3 +1,5 @@
+import type { Language } from './i18n/index.ts';
+import type { LessonId } from './level-types.ts';
 import { LEVELS } from './levels.ts';
 
 export interface LevelProgress {
@@ -7,17 +9,19 @@ export interface LevelProgress {
 
 export interface Settings {
   wheelOnRight: boolean;
+  language?: Language;
 }
 
 interface SavedData {
   progress: Record<string, LevelProgress>;
   settings: Settings;
+  lessonsSeen: LessonId[];
 }
 
 const KEY = 'drive-practice:v1';
 
 function emptyData(): SavedData {
-  return { progress: {}, settings: { wheelOnRight: false } };
+  return { progress: {}, settings: { wheelOnRight: false }, lessonsSeen: [] };
 }
 
 function load(): SavedData {
@@ -25,7 +29,11 @@ function load(): SavedData {
     const raw = localStorage.getItem(KEY);
     if (!raw) return emptyData();
     const parsed = JSON.parse(raw) as Partial<SavedData>;
-    return { progress: parsed.progress ?? {}, settings: { ...emptyData().settings, ...parsed.settings } };
+    return {
+      progress: parsed.progress ?? {},
+      settings: { ...emptyData().settings, ...parsed.settings },
+      lessonsSeen: parsed.lessonsSeen ?? [],
+    };
   } catch {
     return emptyData();
   }
@@ -56,7 +64,7 @@ export function recordResult(levelId: string, stars: number, time: number): void
 
 export function isUnlocked(levelId: string): boolean {
   const index = LEVELS.findIndex((level) => level.id === levelId);
-  if (index <= 0) return true;
+  if (index <= 0 || progressFor(levelId) !== undefined) return true;
   return progressFor(LEVELS[index - 1].id) !== undefined;
 }
 
@@ -75,5 +83,15 @@ export function getSettings(): Settings {
 
 export function updateSettings(change: Partial<Settings>): void {
   data.settings = { ...data.settings, ...change };
+  save();
+}
+
+export function lessonSeen(lesson: LessonId): boolean {
+  return data.lessonsSeen.includes(lesson);
+}
+
+export function markLessonSeen(lesson: LessonId): void {
+  if (lessonSeen(lesson)) return;
+  data.lessonsSeen.push(lesson);
   save();
 }

@@ -1,3 +1,4 @@
+import { LANGUAGES, chapterText, currentLanguage, levelText, t, type Language } from '../i18n/index.ts';
 import type { Chapter, Level } from '../level-types.ts';
 import { CHAPTERS, LEVELS, chapterOf } from '../levels.ts';
 import { poseFromCentre } from '../physics.ts';
@@ -9,6 +10,7 @@ import { icons, starRow } from './icons.ts';
 
 export interface HomeCallbacks {
   play: (level: Level) => void;
+  changeLanguage: (language: Language, selectedId: string) => void;
 }
 
 function chapterStars(chapter: Chapter): number {
@@ -54,10 +56,23 @@ export class HomeScreen {
   private header(): HTMLElement {
     const stars = totalStars();
     return h('header', { class: 'home-header' }, [
-      h('h1', {}, ['Drive Practice']),
-      h('p', {}, ['Short, calm exercises for tight spaces, parking and reversing. See exactly where every wheel goes.']),
-      h('p', { class: 'home-progress' }, [starRow(1, 1, 'stars inline'), `${stars} of ${LEVELS.length * 3} stars`]),
+      h('h1', {}, [t().appName]),
+      h('p', {}, [t().home.intro]),
+      h('p', { class: 'home-progress' }, [starRow(1, 1, 'stars inline'), t().home.progress(stars, LEVELS.length * 3)]),
+      this.languagePicker(),
     ]);
+  }
+
+  private languagePicker(): HTMLElement {
+    const buttons = LANGUAGES.map((option) => {
+      const active = option.code === currentLanguage();
+      const button = h('button', { class: `language${active ? ' active' : ''}`, type: 'button', lang: option.htmlLang, 'aria-pressed': String(active) }, [option.name]);
+      onTap(button, () => {
+        if (!active) this.callbacks.changeLanguage(option.code, this.selected.id);
+      });
+      return button;
+    });
+    return h('div', { class: 'language-picker', role: 'group', 'aria-label': t().home.language }, buttons);
   }
 
   private chapterSection(chapter: Chapter, number: number): HTMLElement {
@@ -66,8 +81,8 @@ export class HomeScreen {
       h('div', { class: 'chapter-head' }, [
         h('span', { class: 'chapter-number' }, [String(number)]),
         h('div', { class: 'chapter-text' }, [
-          h('h2', {}, [chapter.title]),
-          h('p', {}, [chapter.summary]),
+          h('h2', {}, [chapterText(chapter).title]),
+          h('p', {}, [chapterText(chapter).summary]),
         ]),
         h('span', { class: 'chapter-stars' }, [`${earned}/${chapter.levels.length * 3}`]),
       ]),
@@ -80,7 +95,7 @@ export class HomeScreen {
     const unlocked = isUnlocked(level.id);
     const row = h('button', { class: `level-row${unlocked ? '' : ' locked'}`, type: 'button' }, [
       h('span', { class: 'level-number' }, [String(LEVELS.indexOf(level) + 1)]),
-      h('span', { class: 'level-title' }, [level.title]),
+      h('span', { class: 'level-title' }, [levelText(level).title]),
       unlocked ? starRow(progress?.stars ?? 0) : icons.lock(),
     ]);
     onTap(row, () => this.select(level));
@@ -92,7 +107,7 @@ export class HomeScreen {
     const toggle = h('button', { class: 'setting', type: 'button' }, [icons.swap(), h('span', {}, [])]);
     const label = toggle.querySelector('span')!;
     const refresh = (): void => {
-      label.textContent = getSettings().wheelOnRight ? 'Steering wheel on the right' : 'Steering wheel on the left';
+      label.textContent = getSettings().wheelOnRight ? t().home.wheelOnRight : t().home.wheelOnLeft;
     };
     onTap(toggle, () => {
       updateSettings({ wheelOnRight: !getSettings().wheelOnRight });
@@ -108,16 +123,16 @@ export class HomeScreen {
     const unlocked = isUnlocked(level.id);
     const progress = progressFor(level.id);
     const chapter = chapterOf(level);
-    const play = h('button', { class: 'primary', type: 'button', disabled: !unlocked }, [progress ? 'Play again' : 'Start']);
+    const play = h('button', { class: 'primary', type: 'button', disabled: !unlocked }, [progress ? t().home.playAgain : t().home.start]);
     onTap(play, () => {
       if (unlocked) this.callbacks.play(level);
     });
     this.info.replaceChildren(
       h('div', { class: 'preview-text' }, [
-        h('h2', {}, [level.title]),
-        h('p', { class: 'card-sub' }, [`${chapter.title}, level ${LEVELS.indexOf(level) + 1}`]),
-        h('p', { class: 'goal' }, [level.goal]),
-        !unlocked && h('p', { class: 'locked-note' }, ['Finish the level before this one to unlock it.']),
+        h('h2', {}, [levelText(level).title]),
+        h('p', { class: 'card-sub' }, [t().levelOf(chapterText(chapter).title, LEVELS.indexOf(level) + 1)]),
+        h('p', { class: 'goal' }, [levelText(level).goal]),
+        !unlocked && h('p', { class: 'locked-note' }, [t().home.lockedNote]),
       ]),
       h('div', { class: 'preview-actions' }, [progress ? starRow(progress.stars, 3, 'stars big') : null, play]),
     );

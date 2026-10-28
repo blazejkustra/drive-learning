@@ -1,5 +1,7 @@
 import './style.css';
+import { detectLanguage, setLanguage, type Language } from './i18n/index.ts';
 import type { Level } from './level-types.ts';
+import { getSettings, updateSettings } from './storage.ts';
 import { HomeScreen } from './ui/home.ts';
 import { PlayScreen } from './ui/play.ts';
 
@@ -20,7 +22,13 @@ function show(screen: Screen): void {
 }
 
 function showHome(selectedId?: string): void {
-  show(new HomeScreen({ play: playLevel }, selectedId));
+  show(new HomeScreen({ play: playLevel, changeLanguage }, selectedId));
+}
+
+function changeLanguage(language: Language, selectedId: string): void {
+  updateSettings({ language });
+  setLanguage(language);
+  showHome(selectedId);
 }
 
 function playLevel(level: Level): void {
@@ -43,4 +51,5 @@ function blockBrowserGestures(): void {
 }
 
 blockBrowserGestures();
+setLanguage(getSettings().language ?? detectLanguage());
 showHome();

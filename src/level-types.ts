@@ -1,4 +1,5 @@
 import type { Box } from './geometry.ts';
+import type { ChapterId, LevelId } from './i18n/en.ts';
 
 export type SurfaceKind = 'asphalt' | 'pavement' | 'grass' | 'concrete' | 'garage' | 'gravel';
 export type GroundKind = 'grass' | 'garage';
@@ -61,10 +62,7 @@ export interface Checkpoint {
 }
 
 export interface Level {
-  id: string;
-  title: string;
-  goal: string;
-  tips: string[];
+  id: LevelId;
   bounds: { x: number; y: number; w: number; h: number };
   map: MapData;
   start: StartPose;
@@ -75,9 +73,10 @@ export interface Level {
   maxTouches?: number;
 }
 
+export type LessonId = 'turning';
+
 export interface Chapter {
-  id: string;
-  title: string;
-  summary: string;
+  id: ChapterId;
+  lesson?: LessonId;
   levels: Level[];
 }
