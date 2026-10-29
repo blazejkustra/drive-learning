@@ -1,0 +1,67 @@
+default_platform(:ios)
+
+APP_ID = "com.blazejkustra.drivelearning"
+PROJECT = "ios/App/App.xcodeproj"
+
+def next_build_number
+  latest_testflight_build_number(app_identifier: APP_ID, initial_build_number: 0) + 1
+end
+
+def signing_xcargs(build_number)
+  args = ["-allowProvisioningUpdates", "CURRENT_PROJECT_VERSION=#{build_number}"]
+  args << "DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']}" if ENV["APPLE_TEAM_ID"]
+  args.join(" ")
+end
+
+platform :ios do
+  private_lane :build do
+    Dir.chdir("..") do
+      sh("npm", "run", "build")
+      sh("npx", "cap", "sync", "ios")
+    end
+    build_number = next_build_number
+    UI.message("Building #{APP_ID} build #{build_number}")
+    build_app(
+      project: PROJECT,
+      scheme: "App",
+      configuration: "Release",
+      export_method: "app-store",
+      xcargs: signing_xcargs(build_number),
+      export_xcargs: "-allowProvisioningUpdates",
+      output_directory: "build/ios",
+      clean: true
+    )
+  end
+
+  desc "Create the app record in App Store Connect (needs Apple ID login, run once)"
+  lane :create_app do
+    produce(
+      app_identifier: APP_ID,
+      app_name: "Drive Practice: Parking",
+      language: "en-US",
+      sku: "drive-learning"
+    )
+  end
+
+  desc "Build and upload to TestFlight"
+  lane :beta do
+    build
+    upload_to_testflight(skip_waiting_for_build_processing: true)
+  end
+
+  desc "Build and upload the binary, metadata and screenshots. Pass submit:true to submit for review"
+  lane :release do |options|
+    submit = options[:submit] == true || options[:submit].to_s == "true"
+    build
+    upload_to_app_store(
+      metadata_path: "fastlane/metadata",
+      screenshots_path: "fastlane/screenshots",
+      overwrite_screenshots: true,
+      force: true,
+      submit_for_review: submit,
+      automatic_release: false,
+      precheck_include_in_app_purchases: false,
+      submission_information: { add_id_info_uses_idfa: false }
+    )
+  end
+end

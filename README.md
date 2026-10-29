@@ -35,6 +35,26 @@ Xcode opens the project. Select the App target, open **Signing & Capabilities** 
 
 `npm run ios:build` builds for the simulator without signing, as a quick check.
 
+## Publish to the App Store
+
+Prerequisites:
+
+- A paid Apple Developer Program membership, and Xcode signed in to that account (Xcode > Settings > Accounts) so automatic signing can create certificates and profiles.
+- Ruby with Bundler, then `bundle install` once.
+- An app record for `com.blazejkustra.drivelearning` in App Store Connect. Create it on the website, or run `bundle exec fastlane ios create_app` once (it asks for your Apple ID).
+- Credentials: either an App Store Connect API key saved as a [fastlane JSON key file](https://docs.fastlane.tools/app-store-connect-api/#using-fastlane-api-key-json-file) with `APP_STORE_CONNECT_API_KEY_PATH` pointing to it, or no key and fastlane asks for your Apple ID and 2FA code. Set `APPLE_TEAM_ID` if your account belongs to more than one team.
+
+```sh
+export APPLE_TEAM_ID=XXXXXXXXXX
+export APP_STORE_CONNECT_API_KEY_PATH=~/keys/drive-practice.json
+
+npm run beta:ios                    # build and upload to TestFlight
+npm run release:ios                 # build, upload binary, metadata and screenshots
+npm run release:ios -- submit:true  # same, then submit for review
+```
+
+Each run builds the web app, syncs it into `ios/`, picks the next build number after the latest one on TestFlight and archives with automatic signing. Store text lives in `fastlane/metadata/<locale>/` and screenshots in `fastlane/screenshots/<locale>/`. Fill in `fastlane/metadata/review_information/` before submitting. The privacy policy and support pages are `public/privacy.html` and `public/support.html`, published with the web build.
+
 ## Run it locally
 
 ```sh

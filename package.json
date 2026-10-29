@@ -9,7 +9,9 @@
     "preview": "vite preview --host",
     "check-levels": "node scripts/check-levels.ts",
     "ios": "npm run build && cap sync ios && cap open ios",
-    "ios:build": "npm run build && cap sync ios && xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath ios/DerivedData CODE_SIGNING_ALLOWED=NO -quiet build"
+    "ios:build": "npm run build && cap sync ios && xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath ios/DerivedData CODE_SIGNING_ALLOWED=NO -quiet build",
+    "beta:ios": "bundle exec fastlane ios beta",
+    "release:ios": "bundle exec fastlane ios release"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.6.0",

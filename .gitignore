@@ -5,3 +5,10 @@ dist
 .env.*
 *.log
 .vite
+.bundle
+vendor/bundle
+build/ios
+fastlane/README.md
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output
