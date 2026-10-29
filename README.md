@@ -20,6 +20,21 @@ On the iPad:
 2. Tap Share, then **Add to Home Screen**.
 3. Open Drive Practice from the home screen. It runs full screen in landscape like an app.
 
+## Install on iPhone/iPad
+
+On a Mac with Xcode:
+
+```sh
+git clone https://github.com/blazejkustra/drive-learning.git
+cd drive-learning
+npm install
+npm run ios
+```
+
+Xcode opens the project. Select the App target, open **Signing & Capabilities** and pick your team (a free Apple ID works). Plug in the iPhone or iPad, choose it as the run destination and press **Run**. Apps signed with a free account stop opening after 7 days; run again from Xcode to renew. A paid Apple Developer account removes that limit and allows TestFlight.
+
+`npm run ios:build` builds for the simulator without signing, as a quick check.
+
 ## Run it locally
 
 ```sh
