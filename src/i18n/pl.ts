@@ -11,7 +11,7 @@ function touchWord(count: number) {
 
 export const pl: Messages = {
   appName: 'Trening jazdy',
-  rotateNote: 'Obróć iPada poziomo, żeby jeździć.',
+  rotateNote: 'Obróć telefon lub tablet poziomo, żeby jeździć.',
   starsLabel: (filled: number, total: number) => `${filled} z ${total} gwiazdek`,
 
   home: {
@@ -36,6 +36,8 @@ export const pl: Messages = {
     followCar: 'Śledź auto',
     slow: 'Wolno',
     restart: 'Od nowa',
+    menu: 'Opcje',
+    tips: 'Wskazówki',
     nextTip: 'Kolejna rada',
     frontWheels: 'Przednie koła',
     straight: 'Prosto',

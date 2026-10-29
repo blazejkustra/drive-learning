@@ -4,7 +4,7 @@ const toques = (n: number) => (n === 1 ? '1 toque' : `${n} toques`);
 
 export const es: Messages = {
   appName: 'Práctica de conducción',
-  rotateNote: 'Gira el iPad en horizontal para conducir.',
+  rotateNote: 'Gira el móvil o la tableta en horizontal para conducir.',
   starsLabel: (filled: number, total: number) => `${filled} de ${total} estrellas`,
 
   home: {
@@ -29,6 +29,8 @@ export const es: Messages = {
     followCar: 'Seguir coche',
     slow: 'Lento',
     restart: 'Reiniciar',
+    menu: 'Opciones',
+    tips: 'Consejos',
     nextTip: 'Otro consejo',
     frontWheels: 'Ruedas delanteras',
     straight: 'Recto',

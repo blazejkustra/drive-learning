@@ -16,6 +16,7 @@ export const icons = {
   restart: () => icon('<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/>'),
   next: () => icon('<path d="M9 5l7 7-7 7"/>'),
   lock: () => icon('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'),
+  menu: () => icon('<path d="M4 7h16M4 12h16M4 17h16"/>'),
   swap: () => icon('<path d="M4 8h14l-3-3M20 16H6l3 3"/>'),
 };
 

@@ -15,6 +15,7 @@ export interface Bounds {
 }
 
 const FOLLOW_SCALE = 34;
+const FOLLOW_MIN_METRES = 13;
 
 export class Camera {
   scale = 20;
@@ -31,7 +32,8 @@ export class Camera {
 
   follow(target: Vec, viewport: Viewport, smoothing: number): void {
     this.viewport = viewport;
-    this.scale += (FOLLOW_SCALE - this.scale) * smoothing;
+    const scale = Math.min(FOLLOW_SCALE, Math.min(viewport.w, viewport.h) / FOLLOW_MIN_METRES);
+    this.scale += (scale - this.scale) * smoothing;
     this.centre = {
       x: this.centre.x + (target.x - this.centre.x) * smoothing,
       y: this.centre.y + (target.y - this.centre.y) * smoothing,

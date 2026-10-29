@@ -2,7 +2,7 @@ import type { ObstacleKind } from '../level-types.ts';
 
 export const en = {
   appName: 'Drive Practice',
-  rotateNote: 'Turn your iPad sideways to drive.',
+  rotateNote: 'Turn your phone or tablet sideways to drive.',
   starsLabel: (filled: number, total: number) => `${filled} of ${total} stars`,
 
   home: {
@@ -27,6 +27,8 @@ export const en = {
     followCar: 'Follow car',
     slow: 'Slow',
     restart: 'Restart',
+    menu: 'Options',
+    tips: 'Tips',
     nextTip: 'Next tip',
     frontWheels: 'Front wheels',
     straight: 'Straight',

@@ -79,6 +79,10 @@ export class PlayScreen {
   private readonly steerMarker: HTMLElement;
   private readonly toggles: { guides: HTMLButtonElement; trail: HTMLButtonElement; camera: HTMLButtonElement; slow: HTMLButtonElement };
   private readonly overlay: HTMLElement;
+  private readonly hud: HTMLElement;
+  private readonly steerPanel: HTMLElement;
+  private readonly drivePanel: HTMLElement;
+  private readonly menuButton: HTMLButtonElement;
 
   private showGuides: boolean;
   private showTrail = true;
@@ -91,6 +95,7 @@ export class PlayScreen {
   private lastFrame = 0;
   private toastTimer = 0;
   private pixelRatio = 1;
+  private view: Viewport = { x: 0, y: 0, w: 100, h: 100 };
   private readonly resizeObserver: ResizeObserver;
 
   constructor(level: Level, callbacks: PlayCallbacks) {
@@ -135,6 +140,10 @@ export class PlayScreen {
     onTap(this.toggles.slow, () => this.setSlow(!this.slowMotion));
     const restart = h('button', { class: 'hud-button', type: 'button' }, [icons.restart(), h('span', {}, [hudText.restart])]);
     onTap(restart, () => this.callbacks.play(this.level));
+    this.menuButton = h('button', { class: 'hud-button menu-button', type: 'button', 'aria-expanded': 'false' }, [icons.menu(), h('span', {}, [hudText.menu])]);
+    onTap(this.menuButton, () => this.setMenu(!this.element.classList.contains('menu-open')));
+    const menuBackdrop = h('div', { class: 'menu-backdrop' });
+    onTap(menuBackdrop, () => this.setMenu(false));
 
     this.hint = h('span', { class: 'hint-text' });
     this.hintBar = h('span', { class: 'hint-progress' });
@@ -152,7 +161,7 @@ export class PlayScreen {
     const chapter = chapterOf(level);
     const levelNumber = LEVELS.indexOf(level) + 1;
 
-    const hud = h('header', { class: 'hud' }, [
+    this.hud = h('header', { class: 'hud' }, [
       back,
       h('div', { class: 'hud-title' }, [
         h('div', { class: 'hud-heading' }, [
@@ -161,10 +170,15 @@ export class PlayScreen {
         ]),
         h('div', { class: 'tip' }, [this.tipText, text.tips.length > 1 && nextTip]),
       ]),
-      h('div', { class: 'hud-toggles' }, [this.toggles.guides, this.toggles.trail, this.toggles.camera, this.toggles.slow, restart]),
+      this.menuButton,
+      h('div', { class: 'hud-menu scrollable' }, [
+        h('div', { class: 'hud-toggles' }, [this.toggles.guides, this.toggles.trail, this.toggles.camera, this.toggles.slow, restart]),
+        h('div', { class: 'menu-tips' }, [h('p', { class: 'menu-title' }, [hudText.tips]), h('ul', {}, text.tips.map((tip) => h('li', {}, [tip])))]),
+        guideLegend(),
+      ]),
     ]);
 
-    const steerPanel = h('aside', { class: 'panel steer-panel' }, [
+    this.steerPanel = h('aside', { class: 'panel steer-panel' }, [
       guideLegend(),
       h('div', { class: 'steer-readout' }, [
         h('span', { class: 'steer-label' }, [hudText.frontWheels]),
@@ -174,7 +188,7 @@ export class PlayScreen {
       this.wheel.element,
     ]);
 
-    const drivePanel = h('aside', { class: 'panel drive-panel' }, [
+    this.drivePanel = h('aside', { class: 'panel drive-panel' }, [
       h('dl', { class: 'stats' }, [
         h('div', {}, [h('dt', {}, [hudText.time]), h('dd', {}, [this.stats.time])]),
         h('div', {}, [h('dt', {}, [hudText.touches]), h('dd', {}, [this.stats.touches, level.maxTouches !== undefined && h('span', { class: 'limit' }, [` / ${level.maxTouches}`])])]),
@@ -189,11 +203,12 @@ export class PlayScreen {
     const settings = getSettings();
     this.element = h('div', { class: `play${settings.wheelOnRight ? ' wheel-right' : ''}` }, [
       this.canvas,
-      hud,
+      menuBackdrop,
+      this.hud,
       h('div', { class: 'hint' }, [this.hint, this.hintBar]),
       this.toast,
-      steerPanel,
-      drivePanel,
+      this.steerPanel,
+      this.drivePanel,
       this.overlay,
     ]);
 
@@ -237,11 +252,15 @@ export class PlayScreen {
   };
 
   private viewport(): Viewport {
-    const width = this.element.clientWidth;
-    const height = this.element.clientHeight;
-    const side = Math.min(268, width * 0.24);
-    const top = 84;
-    return { x: side, y: top, w: Math.max(100, width - side * 2), h: Math.max(100, height - top - 10) };
+    return this.view;
+  }
+
+  private measureClearArea(): Viewport {
+    const frame = this.element.getBoundingClientRect();
+    const [left, right] = [this.steerPanel, this.drivePanel].map((panel) => panel.getBoundingClientRect()).sort((a, b) => a.left - b.left);
+    const x = left.right - frame.left;
+    const y = this.hud.getBoundingClientRect().bottom - frame.top + 8;
+    return { x, y, w: Math.max(100, right.left - frame.left - x), h: Math.max(100, frame.height - y - 10) };
   }
 
   private resize(): void {
@@ -252,6 +271,7 @@ export class PlayScreen {
     this.canvas.height = Math.round(height * this.pixelRatio);
     this.canvas.style.width = `${width}px`;
     this.canvas.style.height = `${height}px`;
+    this.view = this.measureClearArea();
     if (this.cameraMode === 'fit') this.camera.fit(this.level.bounds, this.viewport());
   }
 
@@ -336,6 +356,11 @@ export class PlayScreen {
     setToggle(this.toggles.camera, mode === 'follow', mode === 'fit' ? t().hud.wholeArea : t().hud.followCar);
   }
 
+  private setMenu(open: boolean): void {
+    this.element.classList.toggle('menu-open', open);
+    this.menuButton.setAttribute('aria-expanded', String(open));
+  }
+
   private setSlow(on: boolean): void {
     this.slowMotion = on;
     setToggle(this.toggles.slow, on);
@@ -355,6 +380,8 @@ export class PlayScreen {
   }
 
   private openOverlay(card: HTMLElement): void {
+    this.setMenu(false);
+    card.classList.add('scrollable');
     this.overlay.replaceChildren(card);
     this.overlay.classList.remove('hidden');
     this.gas.release();

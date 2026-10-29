@@ -3,7 +3,7 @@ import type { Messages } from './en.ts';
 
 export const de: Messages = {
   appName: 'Fahrtraining',
-  rotateNote: 'Dreh dein iPad quer, um zu fahren.',
+  rotateNote: 'Dreh dein Handy oder Tablet quer, um zu fahren.',
   starsLabel: (filled: number, total: number) => `${filled} von ${total} Sternen`,
 
   home: {
@@ -28,6 +28,8 @@ export const de: Messages = {
     followCar: 'Auto folgen',
     slow: 'Langsam',
     restart: 'Neustart',
+    menu: 'Optionen',
+    tips: 'Tipps',
     nextTip: 'Nächster Tipp',
     frontWheels: 'Vorderräder',
     straight: 'Gerade',

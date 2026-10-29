@@ -2,7 +2,7 @@ import type { Messages } from './en.ts';
 
 export const zh: Messages = {
   appName: '驾驶练习',
-  rotateNote: '把 iPad 横过来就可以开车了。',
+  rotateNote: '把手机或平板横过来就可以开车了。',
   starsLabel: (filled: number, total: number) => `${total} 颗星中的 ${filled} 颗`,
 
   home: {
@@ -27,6 +27,8 @@ export const zh: Messages = {
     followCar: '跟随车辆',
     slow: '慢速',
     restart: '重来',
+    menu: '选项',
+    tips: '提示',
     nextTip: '下一条提示',
     frontWheels: '前轮',
     straight: '回正',

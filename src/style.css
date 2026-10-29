@@ -1035,3 +1035,462 @@ dd {
     max-width: calc(100vw - 560px);
   }
 }
+
+.hud-menu {
+  display: contents;
+}
+
+.menu-button,
+.menu-backdrop,
+.menu-tips,
+.hud-menu .legend {
+  display: none;
+}
+
+@media (max-height: 500px) {
+  .primary,
+  .secondary {
+    min-height: 48px;
+    padding: 0 20px;
+    font-size: 16px;
+  }
+
+  .home {
+    grid-template-columns: minmax(300px, 46%) 1fr;
+  }
+
+  .home-list {
+    padding: calc(16px + env(safe-area-inset-top)) 18px calc(16px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));
+  }
+
+  .home-header h1 {
+    font-size: 24px;
+  }
+
+  .home-header p {
+    margin-top: 4px;
+    font-size: 14px;
+  }
+
+  .home-header .home-progress {
+    margin-top: 8px;
+  }
+
+  .language-picker {
+    margin-top: 10px;
+  }
+
+  .language {
+    min-height: 36px;
+    padding: 0 10px;
+    font-size: 14px;
+  }
+
+  .chapter {
+    margin-top: 18px;
+  }
+
+  .chapter-head {
+    grid-template-columns: 30px 1fr auto;
+    gap: 10px;
+  }
+
+  .chapter-number {
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
+  }
+
+  .chapter-text h2 {
+    font-size: 17px;
+  }
+
+  .chapter-text p {
+    font-size: 13px;
+  }
+
+  .level-list {
+    margin: 6px 0 0 14px;
+    padding-left: 12px;
+  }
+
+  .level-row {
+    min-height: 44px;
+    grid-template-columns: 26px 1fr auto;
+    padding: 4px 10px;
+    font-size: 15px;
+  }
+
+  .home-settings {
+    margin-top: 18px;
+    padding-top: 8px;
+  }
+
+  .preview-info {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+    padding: 12px calc(16px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) 16px;
+  }
+
+  .preview-text h2 {
+    font-size: 19px;
+  }
+
+  .card-sub {
+    font-size: 13px;
+  }
+
+  .goal {
+    margin-top: 6px;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .preview-actions {
+    margin-left: auto;
+    gap: 12px;
+  }
+
+  .preview-actions .stars.big .star {
+    width: 22px;
+    height: 22px;
+  }
+
+  .hud {
+    height: calc(50px + env(safe-area-inset-top));
+    gap: 8px;
+    padding-left: calc(8px + env(safe-area-inset-left));
+    padding-right: calc(8px + env(safe-area-inset-right));
+  }
+
+  .hud-button {
+    min-height: 40px;
+    min-width: 44px;
+    padding: 0 12px;
+    border-radius: 12px;
+  }
+
+  .hud-heading strong {
+    font-size: 17px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .hud-sub,
+  .tip,
+  .hud .hud-toggles .hud-button span {
+    display: none;
+  }
+
+  .menu-button {
+    display: inline-flex;
+    flex: none;
+  }
+
+  .play.menu-open .menu-button {
+    background: rgba(47, 111, 224, 0.9);
+  }
+
+  .play.menu-open .menu-backdrop {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    background: rgba(12, 16, 22, 0.35);
+  }
+
+  .play.menu-open .hud {
+    z-index: 6;
+  }
+
+  .hud-menu {
+    display: none;
+  }
+
+  .play.menu-open .hud-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: calc(8px + env(safe-area-inset-right));
+    width: min(340px, calc(100vw - 16px));
+    max-height: calc(100vh - 70px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    display: grid;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 16px;
+    background: rgba(20, 26, 34, 0.96);
+    border: 1px solid var(--glass-line);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .play.menu-open .hud-toggles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .play.menu-open .hud .hud-toggles .hud-button {
+    justify-content: flex-start;
+    min-height: 46px;
+  }
+
+  .play.menu-open .hud .hud-toggles .hud-button span {
+    display: inline;
+  }
+
+  .play.menu-open .menu-tips {
+    display: block;
+    padding: 4px 6px 0;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #d9e1ea;
+  }
+
+  .menu-title {
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: var(--light);
+  }
+
+  .menu-tips ul {
+    padding-left: 18px;
+    display: grid;
+    gap: 4px;
+  }
+
+  .play.menu-open .hud-menu .legend {
+    display: block;
+    margin: 0;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .steer-panel .legend {
+    display: none;
+  }
+
+  .panel {
+    top: calc(56px + env(safe-area-inset-top));
+    width: auto;
+    padding: 0 8px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .steer-panel {
+    left: calc(4px + env(safe-area-inset-left));
+  }
+
+  .drive-panel {
+    right: calc(4px + env(safe-area-inset-right));
+  }
+
+  .play.wheel-right .steer-panel {
+    right: calc(4px + env(safe-area-inset-right));
+  }
+
+  .play.wheel-right .drive-panel {
+    left: calc(4px + env(safe-area-inset-left));
+  }
+
+  .steer-readout {
+    align-self: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    display: block;
+  }
+
+  .steer-label,
+  .steer-gauge {
+    display: none;
+  }
+
+  .steer-value {
+    font-size: 14px;
+  }
+
+  .wheel {
+    margin-top: 8px;
+    width: clamp(140px, 19vw, 168px);
+  }
+
+  .stats {
+    margin-top: 0;
+    padding: 5px 10px;
+    border-radius: 999px;
+    gap: 4px;
+  }
+
+  .stats dt {
+    font-size: 10px;
+  }
+
+  .stats dd {
+    margin-top: 0;
+    font-size: 15px;
+  }
+
+  .stats .limit {
+    font-size: 12px;
+  }
+
+  .controls {
+    gap: 8px;
+  }
+
+  .gears {
+    gap: 4px;
+    padding: 4px;
+    border-radius: 14px;
+  }
+
+  .gear {
+    width: 54px;
+    height: 50px;
+    border-radius: 10px;
+  }
+
+  .gear-letter {
+    font-size: 21px;
+  }
+
+  .gear-name {
+    font-size: 10px;
+    margin-top: 2px;
+  }
+
+  .pedal {
+    padding-bottom: 8px;
+  }
+
+  .pedal-grip {
+    inset: 10px 10px 34px;
+  }
+
+  .pedal-label {
+    font-size: 14px;
+  }
+
+  .pedal.brake {
+    width: 78px;
+    height: 104px;
+  }
+
+  .pedal.gas {
+    width: 60px;
+    height: 142px;
+  }
+
+  .key-hint {
+    display: none;
+  }
+
+  .hint {
+    top: calc(58px + env(safe-area-inset-top));
+    max-width: min(440px, calc(100vw - 480px));
+    padding: 7px 14px 9px;
+    font-size: 14px;
+  }
+
+  .toast {
+    top: calc(104px + env(safe-area-inset-top));
+    max-width: min(460px, calc(100vw - 460px));
+    padding: 9px 14px;
+    font-size: 14px;
+  }
+
+  .overlay {
+    padding: calc(10px + env(safe-area-inset-top)) calc(10px + env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) calc(10px + env(safe-area-inset-left));
+  }
+
+  .card {
+    max-height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    padding: 18px 22px 0;
+    border-radius: 18px;
+  }
+
+  .card h2 {
+    font-size: 21px;
+  }
+
+  .tips {
+    margin-top: 10px;
+    gap: 4px;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .strict {
+    margin-top: 8px;
+  }
+
+  .card-actions,
+  .lesson-actions {
+    position: sticky;
+    bottom: 0;
+    margin-top: 12px;
+    padding: 10px 0 16px;
+    background: #fbfaf7;
+  }
+
+  .stars.big .star {
+    width: 30px;
+    height: 30px;
+  }
+
+  .result-card .stars {
+    margin-top: 6px;
+  }
+
+  .result-stats {
+    margin-top: 8px;
+    gap: 0;
+    font-size: 15px;
+  }
+
+  .result-stats div {
+    padding: 5px 0;
+  }
+
+  .lesson-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    grid-template-areas: 'title title' 'stage text' 'actions actions';
+    column-gap: 18px;
+    align-items: start;
+  }
+
+  .lesson-card h2 {
+    grid-area: title;
+  }
+
+  .lesson-stage {
+    grid-area: stage;
+    margin-top: 10px;
+  }
+
+  .lesson-canvas {
+    max-height: none;
+  }
+
+  .lesson-stage .legend {
+    left: 6px;
+    bottom: 4px;
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .lesson-text {
+    grid-area: text;
+    margin-top: 10px;
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .lesson-actions {
+    grid-area: actions;
+  }
+}
