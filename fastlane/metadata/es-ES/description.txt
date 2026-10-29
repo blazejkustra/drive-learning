@@ -1,0 +1,25 @@
+Práctica de conducción es un juego tranquilo para quien se pone nervioso en espacios estrechos. Muestra cómo se mueve un coche de verdad, para que aparcar y girar dejen de ser una adivinanza.
+
+Solo giran las ruedas delanteras. El coche pivota sobre el eje trasero, las ruedas traseras se cierran por dentro de las delanteras en cada curva y, marcha atrás, la parte trasera va hacia donde giras el volante. Aquí lo ves todo mientras ocurre.
+
+CÓMO FUNCIONA
+• Gira un volante grande en pantalla, de tope a tope en vuelta y media
+• Elige P, R o D y usa el acelerador y el freno con la otra mano
+• Las líneas guía muestran por dónde irá cada rueda y la esquina delantera
+• Un marcador indica el punto sobre el que gira el coche
+• Una estela muestra por dónde pasaron de verdad tus ruedas
+
+22 NIVELES CORTOS EN CINCO CAPÍTULOS
+• Lo básico: parar en una línea, curvas suaves, un círculo completo, marcha atrás recta
+• Girar: esquinas, columnas de garaje, una puerta estrecha, conos, un cambio de sentido
+• Marcha atrás: en una esquina, hacia una entrada, al salir de una plaza
+• Aparcar: en batería hacia delante y hacia atrás, en diagonal, en línea
+• Espacios difíciles: cambio de sentido en tres maniobras, garaje subterráneo, garaje de casa, rampa
+
+Antes del capítulo de giros, una lección animada muestra por qué la parte trasera se cierra en las curvas y qué significa al lado de una columna.
+
+Sin prisas ni penalizaciones por ir despacio. Si tocas algo, el juego te dice qué parte del coche chocó y por qué, y puedes seguir. La cámara lenta, la vista completa y el volante a la izquierda o a la derecha te ayudan a practicar a tu manera.
+
+Sin cuentas, sin anuncios, sin seguimiento. Tu progreso se queda en tu dispositivo.
+
+Práctica de conducción es una ayuda para practicar y no sustituye a las clases con un profesor de autoescuela.
