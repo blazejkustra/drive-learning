@@ -242,14 +242,18 @@ export class PlayScreen {
     const elapsed = Math.min(0.05, (now - this.lastFrame) / 1000);
     this.lastFrame = now;
     const dt = this.slowMotion ? elapsed * 0.4 : elapsed;
-    if (!this.paused) this.wheel.selfCentre(this.session.speed * dt);
+    if (!this.frozen) this.wheel.selfCentre(this.session.speed * dt);
     this.session.steer = steerFromWheel(this.wheel.angle);
     this.session.pedals = { gas: this.gas.pressed, brake: this.brake.pressed };
-    if (!this.paused) this.session.update(dt);
+    if (!this.frozen) this.session.update(dt);
     this.render(elapsed);
     this.updateHud();
     this.frameHandle = requestAnimationFrame(this.frame);
   };
+
+  private get frozen(): boolean {
+    return this.paused || this.element.classList.contains('menu-open');
+  }
 
   private viewport(): Viewport {
     return this.view;
@@ -264,6 +268,7 @@ export class PlayScreen {
   }
 
   private resize(): void {
+    if (getComputedStyle(this.menuButton).display === 'none') this.setMenu(false);
     this.pixelRatio = Math.min(2, window.devicePixelRatio || 1);
     const width = this.element.clientWidth;
     const height = this.element.clientHeight;
@@ -323,7 +328,7 @@ export class PlayScreen {
   }
 
   private selectGear(gear: Gear): void {
-    if (this.paused) return;
+    if (this.frozen) return;
     if (this.session.setGear(gear)) {
       this.gears.show(gear);
       if (gear === 'P') this.gas.release();
@@ -331,7 +336,7 @@ export class PlayScreen {
   }
 
   private pressPedalKey(pedal: PedalName, down: boolean): void {
-    if (down && (this.paused || (pedal === 'gas' && this.session.gear === 'P'))) return;
+    if (down && (this.frozen || (pedal === 'gas' && this.session.gear === 'P'))) return;
     this[pedal].holdKey(down);
   }
 
