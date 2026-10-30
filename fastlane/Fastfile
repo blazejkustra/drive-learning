@@ -39,7 +39,6 @@ platform :ios do
       configuration: "Release",
       export_method: "app-store",
       xcargs: signing_xcargs(build_number),
-      export_xcargs: (["-allowProvisioningUpdates"] + api_key_auth_args).join(" "),
       output_directory: "build/ios",
       clean: true
     )
