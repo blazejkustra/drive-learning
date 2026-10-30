@@ -29,7 +29,6 @@ export const en = {
     restart: 'Restart',
     menu: 'Options',
     tips: 'Tips',
-    nextTip: 'Next tip',
     frontWheels: 'Front wheels',
     straight: 'Straight',
     steerLeft: (degrees: number) => `${degrees}° left`,

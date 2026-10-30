@@ -38,7 +38,6 @@ export const pl: Messages = {
     restart: 'Od nowa',
     menu: 'Opcje',
     tips: 'Wskazówki',
-    nextTip: 'Kolejna rada',
     frontWheels: 'Przednie koła',
     straight: 'Prosto',
     steerLeft: (degrees: number) => `${degrees}° w lewo`,

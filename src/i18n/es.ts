@@ -31,7 +31,6 @@ export const es: Messages = {
     restart: 'Reiniciar',
     menu: 'Opciones',
     tips: 'Consejos',
-    nextTip: 'Otro consejo',
     frontWheels: 'Ruedas delanteras',
     straight: 'Recto',
     steerLeft: (degrees: number) => `${degrees}° izq.`,

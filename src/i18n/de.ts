@@ -30,7 +30,6 @@ export const de: Messages = {
     restart: 'Neustart',
     menu: 'Optionen',
     tips: 'Tipps',
-    nextTip: 'Nächster Tipp',
     frontWheels: 'Vorderräder',
     straight: 'Gerade',
     steerLeft: (degrees: number) => `${degrees}° links`,

@@ -25,6 +25,7 @@ type CameraMode = 'fit' | 'follow';
 
 const BUMP_FLASH_SECONDS = 0.9;
 const TOAST_SECONDS = 2.6;
+const CLEAR_AREA_MARGIN = 10;
 
 function toggleButton(label: string, icon: SVGSVGElement): HTMLButtonElement {
   return h('button', { class: 'hud-button toggle', type: 'button', 'aria-pressed': 'false' }, [icon, h('span', {}, [label])]);
@@ -70,7 +71,6 @@ export class PlayScreen {
   private readonly gears: GearSelector;
   private readonly keyboard: KeyboardControls;
 
-  private readonly tipText: HTMLElement;
   private readonly hint: HTMLElement;
   private readonly hintBar: HTMLElement;
   private readonly toast: HTMLElement;
@@ -79,7 +79,6 @@ export class PlayScreen {
   private readonly steerMarker: HTMLElement;
   private readonly toggles: { guides: HTMLButtonElement; trail: HTMLButtonElement; camera: HTMLButtonElement; slow: HTMLButtonElement };
   private readonly overlay: HTMLElement;
-  private readonly hud: HTMLElement;
   private readonly steerPanel: HTMLElement;
   private readonly drivePanel: HTMLElement;
   private readonly menuButton: HTMLButtonElement;
@@ -89,7 +88,6 @@ export class PlayScreen {
   private slowMotion = false;
   private cameraMode: CameraMode = 'follow';
   private lesson: TurningLesson | null = null;
-  private tipIndex = 0;
   private paused = true;
   private frameHandle = 0;
   private lastFrame = 0;
@@ -121,11 +119,7 @@ export class PlayScreen {
 
     const text = levelText(level);
     const hudText = t().hud;
-    this.tipText = h('span', { class: 'tip-text' }, [text.tips[0]]);
-    const nextTip = h('button', { class: 'tip-next', type: 'button', 'aria-label': hudText.nextTip }, [icons.next()]);
-    onTap(nextTip, () => this.cycleTip());
-
-    const back = h('button', { class: 'hud-button back', type: 'button' }, [icons.back(), h('span', {}, [hudText.levels])]);
+    const back = h('button', { class: 'hud-button back', type: 'button', 'aria-label': hudText.levels }, [icons.back()]);
     onTap(back, () => this.callbacks.exit());
 
     this.toggles = {
@@ -161,17 +155,14 @@ export class PlayScreen {
     const chapter = chapterOf(level);
     const levelNumber = LEVELS.indexOf(level) + 1;
 
-    this.hud = h('header', { class: 'hud' }, [
+    const hud = h('header', { class: 'hud' }, [
       back,
-      h('div', { class: 'hud-title' }, [
-        h('div', { class: 'hud-heading' }, [
-          h('strong', {}, [text.title]),
-          h('span', { class: 'hud-sub' }, [t().levelOf(chapterText(chapter).title, levelNumber)]),
-        ]),
-        h('div', { class: 'tip' }, [this.tipText, text.tips.length > 1 && nextTip]),
-      ]),
       this.menuButton,
       h('div', { class: 'hud-menu scrollable' }, [
+        h('div', { class: 'menu-heading' }, [
+          h('strong', {}, [text.title]),
+          h('span', {}, [t().levelOf(chapterText(chapter).title, levelNumber)]),
+        ]),
         h('div', { class: 'hud-toggles' }, [this.toggles.guides, this.toggles.trail, this.toggles.camera, this.toggles.slow, restart]),
         h('div', { class: 'menu-tips' }, [h('p', { class: 'menu-title' }, [hudText.tips]), h('ul', {}, text.tips.map((tip) => h('li', {}, [tip])))]),
         guideLegend(),
@@ -179,7 +170,6 @@ export class PlayScreen {
     ]);
 
     this.steerPanel = h('aside', { class: 'panel steer-panel' }, [
-      guideLegend(),
       h('div', { class: 'steer-readout' }, [
         h('span', { class: 'steer-label' }, [hudText.frontWheels]),
         this.steerValue,
@@ -204,7 +194,7 @@ export class PlayScreen {
     this.element = h('div', { class: `play${settings.wheelOnRight ? ' wheel-right' : ''}` }, [
       this.canvas,
       menuBackdrop,
-      this.hud,
+      hud,
       h('div', { class: 'hint' }, [this.hint, this.hintBar]),
       this.toast,
       this.steerPanel,
@@ -263,12 +253,10 @@ export class PlayScreen {
     const frame = this.element.getBoundingClientRect();
     const [left, right] = [this.steerPanel, this.drivePanel].map((panel) => panel.getBoundingClientRect()).sort((a, b) => a.left - b.left);
     const x = left.right - frame.left;
-    const y = this.hud.getBoundingClientRect().bottom - frame.top + 8;
-    return { x, y, w: Math.max(100, right.left - frame.left - x), h: Math.max(100, frame.height - y - 10) };
+    return { x, y: CLEAR_AREA_MARGIN, w: Math.max(100, right.left - frame.left - x), h: Math.max(100, frame.height - CLEAR_AREA_MARGIN * 2) };
   }
 
   private resize(): void {
-    if (getComputedStyle(this.menuButton).display === 'none') this.setMenu(false);
     this.pixelRatio = Math.min(2, window.devicePixelRatio || 1);
     const width = this.element.clientWidth;
     const height = this.element.clientHeight;
@@ -338,12 +326,6 @@ export class PlayScreen {
   private pressPedalKey(pedal: PedalName, down: boolean): void {
     if (down && (this.frozen || (pedal === 'gas' && this.session.gear === 'P'))) return;
     this[pedal].holdKey(down);
-  }
-
-  private cycleTip(): void {
-    const tips = levelText(this.level).tips;
-    this.tipIndex = (this.tipIndex + 1) % tips.length;
-    this.tipText.textContent = tips[this.tipIndex];
   }
 
   private setGuides(on: boolean): void {
@@ -419,6 +401,7 @@ export class PlayScreen {
         h('p', { class: 'card-sub' }, [t().levelOfTotal(chapterText(chapter).title, LEVELS.indexOf(this.level) + 1, LEVELS.length)]),
         h('p', { class: 'goal' }, [text.goal]),
         h('ul', { class: 'tips' }, text.tips.map((tip) => h('li', {}, [tip]))),
+        this.level === LEVELS[0] && guideLegend(),
         this.level.maxTouches !== undefined && h('p', { class: 'strict' }, [copy.allowedTouches(this.level.maxTouches)]),
         h('div', { class: 'card-actions' }, [lessonButton, startButton]),
       ]),

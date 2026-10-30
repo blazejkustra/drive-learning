@@ -29,7 +29,6 @@ export const zh: Messages = {
     restart: '重来',
     menu: '选项',
     tips: '提示',
-    nextTip: '下一条提示',
     frontWheels: '前轮',
     straight: '回正',
     steerLeft: (degrees: number) => `左 ${degrees}°`,

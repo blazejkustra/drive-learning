@@ -14,7 +14,6 @@ export const icons = {
   camera: () => icon('<path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><rect x="9" y="8" width="6" height="8" rx="1.5"/>'),
   slow: () => icon('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2"/><path d="M10 2h4"/>'),
   restart: () => icon('<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/>'),
-  next: () => icon('<path d="M9 5l7 7-7 7"/>'),
   lock: () => icon('<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'),
   menu: () => icon('<path d="M4 7h16M4 12h16M4 17h16"/>'),
   swap: () => icon('<path d="M4 8h14l-3-3M20 16H6l3 3"/>'),
