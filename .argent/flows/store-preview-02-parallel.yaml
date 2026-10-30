@@ -1,0 +1,6 @@
+executionPrerequisite: App on the pillar level with the car stopped past the turn.
+steps:
+  - echo: Key 6 drives the full parallel park and holds on the result card
+  - tool: keyboard
+    args: { text: "6" }
+  - wait: 15000

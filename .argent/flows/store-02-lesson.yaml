@@ -1,0 +1,7 @@
+steps:
+  - echo: Key 2 opens the turning lesson on the pillar step
+  - launch: com.blazejkustra.drivelearning
+  - wait: 1500
+  - tool: keyboard
+    args: { text: "2" }
+  - wait: 5000

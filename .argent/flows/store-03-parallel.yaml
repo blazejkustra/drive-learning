@@ -1,0 +1,7 @@
+steps:
+  - echo: Key 3 starts the parallel parking stage
+  - launch: com.blazejkustra.drivelearning
+  - wait: 1500
+  - tool: keyboard
+    args: { text: "3" }
+  - wait: 11000

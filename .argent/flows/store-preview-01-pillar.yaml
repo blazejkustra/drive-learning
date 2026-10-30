@@ -1,0 +1,7 @@
+executionPrerequisite: App freshly restarted by goldie, settled on the level list.
+steps:
+  - echo: Key 5 drives the pillar turn in goldie/capture/stage.ts
+  - wait: 1000
+  - tool: keyboard
+    args: { text: "5" }
+  - wait: 11000

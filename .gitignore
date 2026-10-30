@@ -12,3 +12,4 @@ fastlane/README.md
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/test_output
+goldie/out/

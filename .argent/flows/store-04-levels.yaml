@@ -1,0 +1,7 @@
+steps:
+  - echo: Key 4 shows the level list with saved progress
+  - launch: com.blazejkustra.drivelearning
+  - wait: 1500
+  - tool: keyboard
+    args: { text: "4" }
+  - wait: 2000

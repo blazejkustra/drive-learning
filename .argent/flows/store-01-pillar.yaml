@@ -1,0 +1,7 @@
+steps:
+  - echo: Key 1 starts the pillar stage in goldie/capture/stage.ts
+  - launch: com.blazejkustra.drivelearning
+  - wait: 1500
+  - tool: keyboard
+    args: { text: "1" }
+  - wait: 7000
