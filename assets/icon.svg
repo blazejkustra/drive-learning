@@ -1,13 +1,57 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="0" fill="#2f3a46"/>
-  <path d="M120 70v372M392 70v372" stroke="#f4f3ee" stroke-width="18" stroke-linecap="round"/>
-  <path d="M120 442h272" stroke="#f4f3ee" stroke-width="18" stroke-linecap="round"/>
-  <path d="M174 330c-30-60-30-150 6-230" fill="none" stroke="#38c8e3" stroke-width="14" stroke-linecap="round" stroke-dasharray="2 30"/>
-  <rect x="181" y="150" width="150" height="250" rx="40" fill="#2f6fe0"/>
-  <path d="M199 205h114l-12 40h-90z" fill="#16202b"/>
-  <path d="M206 350h100l8 28h-116z" fill="#16202b"/>
-  <rect x="160" y="182" width="26" height="54" rx="8" fill="#16202b"/>
-  <rect x="326" y="182" width="26" height="54" rx="8" fill="#16202b"/>
-  <rect x="160" y="322" width="26" height="54" rx="8" fill="#16202b"/>
-  <rect x="326" y="322" width="26" height="54" rx="8" fill="#16202b"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <radialGradient id="a-bg" cx="0.42" cy="0.4" r="0.85">
+      <stop offset="0" stop-color="#434a54"/>
+      <stop offset="0.65" stop-color="#343a43"/>
+      <stop offset="1" stop-color="#262b32"/>
+    </radialGradient>
+    <linearGradient id="a-body" x1="-120" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2459c2"/>
+      <stop offset="0.22" stop-color="#3274e6"/>
+      <stop offset="0.5" stop-color="#3b7ff0"/>
+      <stop offset="0.78" stop-color="#3274e6"/>
+      <stop offset="1" stop-color="#2459c2"/>
+    </linearGradient>
+    <linearGradient id="a-roof" x1="0" y1="-40" x2="0" y2="110" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3d80f2"/>
+      <stop offset="1" stop-color="#3170e0"/>
+    </linearGradient>
+    <linearGradient id="a-glass" x1="-90" y1="-120" x2="90" y2="150" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2a3d55"/>
+      <stop offset="0.55" stop-color="#16212f"/>
+      <stop offset="1" stop-color="#1c2a3b"/>
+    </linearGradient>
+    <linearGradient id="a-tyre" x1="-22" y1="0" x2="22" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1a1c20"/>
+      <stop offset="0.5" stop-color="#1d2024"/>
+      <stop offset="1" stop-color="#121417"/>
+    </linearGradient>
+    <filter id="a-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#a-bg)"/>
+  <g transform="translate(512 512) scale(1.07) translate(-533 -520)">
+  <g fill="none" stroke-linecap="round" stroke-width="40">
+    <path d="M394.4 440.1A357.9 357.9 0 0 1 894.1 315.3" stroke="#f4f3ee"/>
+    <path d="M454.5 681.1A257.6 257.6 0 0 1 841 400.3" stroke="#38c8e3"/>
+  </g>
+  
+  <g transform="translate(328 612) rotate(-14) scale(0.92)"><path d="M0 -224C70 -224 108 -213 114 -172C119 -132 120 -64 120 0C120 80 119 150 116 184C112 214 72 222 0 222C-72 222 -112 214 -116 184C-119 150 -120 80 -120 0C-120 -64 -119 -132 -114 -172C-108 -213 -70 -224 0 -224Z" fill="#000" opacity="0.55" filter="url(#a-shadow)"/></g>
+  <g transform="translate(318 590) rotate(-14) scale(0.92)">
+    <rect x="-142" y="86" width="44" height="92" rx="16" fill="url(#a-tyre)" transform="rotate(0 -120 132)"/>
+    <rect x="98" y="86" width="44" height="92" rx="16" fill="url(#a-tyre)" transform="rotate(0 120 132)"/>
+    <rect x="-142" y="-184" width="44" height="92" rx="16" fill="url(#a-tyre)" transform="rotate(27.4 -120 -138)"/>
+    <rect x="98" y="-184" width="44" height="92" rx="16" fill="url(#a-tyre)" transform="rotate(44 120 -138)"/>
+    <path d="M-110 -100C-124 -104 -136 -100 -138 -92C-139 -85 -132 -80 -110 -80Z" fill="#2459c2"/>
+    <path d="M110 -100C124 -104 136 -100 138 -92C139 -85 132 -80 110 -80Z" fill="#2459c2"/>
+    <path d="M0 -224C70 -224 108 -213 114 -172C119 -132 120 -64 120 0C120 80 119 150 116 184C112 214 72 222 0 222C-72 222 -112 214 -116 184C-119 150 -120 80 -120 0C-120 -64 -119 -132 -114 -172C-108 -213 -70 -224 0 -224Z" fill="url(#a-body)"/>
+    <path d="M-86 -104Q0 -124 86 -104L90 150Q0 162 -90 150Z" fill="url(#a-glass)" stroke="url(#a-glass)" stroke-width="20" stroke-linejoin="round"/>
+    <path d="M-72 -26Q0 -36 72 -26L74 92Q0 100 -74 92Z" fill="url(#a-roof)" stroke="url(#a-roof)" stroke-width="18" stroke-linejoin="round"/>
+    <path d="M-74 -104Q-30 -116 20 -116L-14 -66Q-48 -66 -76 -60Z" fill="#fff" opacity="0.08"/>
+    <path d="M-104 -192C-100 -206 -88 -214 -66 -217C-64 -208 -70 -200 -84 -194Z" fill="#fff4cf"/>
+    <path d="M104 -192C100 -206 88 -214 66 -217C64 -208 70 -200 84 -194Z" fill="#fff4cf"/>
+    <path d="M-106 196C-100 208 -88 214 -66 216C-66 208 -76 202 -90 198Z" fill="#d8473a"/>
+    <path d="M106 196C100 208 88 214 66 216C66 208 76 202 90 198Z" fill="#d8473a"/></g>
+  </g>
 </svg>
