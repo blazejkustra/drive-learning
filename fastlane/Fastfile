@@ -7,8 +7,20 @@ def next_build_number
   latest_testflight_build_number(app_identifier: APP_ID, initial_build_number: 0) + 1
 end
 
+def api_key_auth_args
+  path = ENV["APP_STORE_CONNECT_API_KEY_PATH"]
+  return [] unless path
+  key = JSON.parse(File.read(File.expand_path(path)))
+  return [] unless key["key_filepath"]
+  [
+    "-authenticationKeyPath #{File.expand_path(key['key_filepath']).shellescape}",
+    "-authenticationKeyID #{key['key_id']}",
+    "-authenticationKeyIssuerID #{key['issuer_id']}"
+  ]
+end
+
 def signing_xcargs(build_number)
-  args = ["-allowProvisioningUpdates", "CURRENT_PROJECT_VERSION=#{build_number}"]
+  args = ["-allowProvisioningUpdates", "CURRENT_PROJECT_VERSION=#{build_number}"] + api_key_auth_args
   args << "DEVELOPMENT_TEAM=#{ENV['APPLE_TEAM_ID']}" if ENV["APPLE_TEAM_ID"]
   args.join(" ")
 end
@@ -27,7 +39,7 @@ platform :ios do
       configuration: "Release",
       export_method: "app-store",
       xcargs: signing_xcargs(build_number),
-      export_xcargs: "-allowProvisioningUpdates",
+      export_xcargs: (["-allowProvisioningUpdates"] + api_key_auth_args).join(" "),
       output_directory: "build/ios",
       clean: true
     )
